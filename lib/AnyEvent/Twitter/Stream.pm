@@ -6,6 +6,7 @@ our $VERSION = '0.01';
 
 use AnyEvent;
 use AnyEvent::HTTP;
+use AnyEvent::Util;
 use JSON;
 use MIME::Base64;
 use URI;
@@ -33,6 +34,7 @@ sub new {
     my $uri = URI->new("http://stream.twitter.com/$method.json");
     $uri->query_form(%args);
 
+    my $handle;
     http_get $uri,
         headers => { Authorization => "Basic $auth" },
         on_header => sub {
@@ -44,7 +46,7 @@ sub new {
         },
         want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
         sub {
-            my($handle, $headers) = @_;
+            ($handle, my $headers) = @_;
 
             if ($handle) {
                 $handles{$handle} = $handle;
@@ -63,6 +65,7 @@ sub new {
             }
         };
 
+    defined wantarray && AnyEvent::Util::guard { delete $handles{$handle}; undef $handle };
 }
 
 1;
@@ -93,11 +96,11 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
       on_tweet => sub {
           my $tweet = shift;
           warn "$tweet->{user}{screen_name}: $tweet->{text}\n";
-     },
+      },
   );
 
   # track keywords
-  AnyEvent::Twitter::Stream->new(
+  my $guard = AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
       method   => "track",
