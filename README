@@ -1,0 +1,27 @@
+This is Perl module AnyEvent::Twitter::Stream.
+
+INSTALLATION
+
+AnyEvent::Twitter::Stream installation is straightforward. If your CPAN shell is set up,
+you should just be able to do
+
+    % cpan AnyEvent::Twitter::Stream
+
+Download it, unpack it, then build it as per the usual:
+
+    % perl Makefile.PL
+    % make && make test
+
+Then install it:
+
+    % make install
+
+DOCUMENTATION
+
+AnyEvent::Twitter::Stream documentation is available as in POD. So you can do:
+
+    % perldoc AnyEvent::Twitter::Stream
+
+to read the documentation online with your favorite pager.
+
+Tatsuhiko Miyagawa
