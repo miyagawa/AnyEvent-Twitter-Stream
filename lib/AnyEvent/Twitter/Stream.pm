@@ -11,6 +11,7 @@ use MIME::Base64;
 use URI;
 
 my %methods = map { $_ => 1 } qw( firehose gardenhose spritzer birddog shadow follow track );
+my %handles;
 
 sub new {
     my $class = shift;
@@ -24,15 +25,13 @@ sub new {
     my $on_eof   = delete $args{on_eof}   || sub {};
 
     unless ($methods{$method}) {
-        return $on_error->("Method $args{method} not available.");
+        return $on_error->("Method $method not available.");
     }
 
     my $auth = MIME::Base64::encode("$username:$password");
 
     my $uri = URI->new("http://stream.twitter.com/$method.json");
     $uri->query_form(%args);
-
-    my $handle;
 
     http_get $uri,
         headers => { Authorization => "Basic $auth" },
@@ -45,10 +44,15 @@ sub new {
         },
         want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
         sub {
-            ($handle, my $headers) = @_;
+            my($handle, $headers) = @_;
 
             if ($handle) {
-                $handle->on_eof($on_eof);
+                $handles{$handle} = $handle;
+                $handle->on_eof(sub {
+                    delete $handles{$_[0]};
+                    undef $_[0];
+                    $on_eof->(@_);
+                });
                 my $reader; $reader = sub {
                     my($handle, $json) = @_;
                     my $tweet = JSON->new->decode($json);
@@ -59,7 +63,6 @@ sub new {
             }
         };
 
-    bless { _handle => $handle }, $class;
 }
 
 1;
@@ -82,7 +85,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
   use AnyEvent::Twitter::Stream;
 
   # receive updates from @following_ids
-  my $client = AnyEvent::Twitter::Stream->new(
+  AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
       method   => "follow",
@@ -94,7 +97,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
   );
 
   # track keywords
-  my $client_keyword = AnyEvent::Twitter::Stream->new(
+  AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
       method   => "track",

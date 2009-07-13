@@ -13,7 +13,7 @@ if ($method eq 'follow') {
     $args{track}  = $args;
 }
 
-my $client = AnyEvent::Twitter::Stream->new(
+AnyEvent::Twitter::Stream->new(
     username => $user,
     password => $password,
     method   => $method || "spritzer",
