@@ -57,7 +57,7 @@ sub new {
                 });
                 my $reader; $reader = sub {
                     my($handle, $json) = @_;
-                    my $tweet = JSON->new->decode($json);
+                    my $tweet = JSON::decode_json($json);
                     $on_tweet->($tweet);
                     $handle->push_read(line => $reader);
                 };
