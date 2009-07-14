@@ -13,6 +13,8 @@ if ($method eq 'follow') {
     $args{track}  = $args;
 }
 
+binmode STDOUT, ":utf8";
+
 my $streamer = AnyEvent::Twitter::Stream->new(
     username => $user,
     password => $password,
@@ -20,7 +22,7 @@ my $streamer = AnyEvent::Twitter::Stream->new(
     %args,
     on_tweet => sub {
         my $tweet = shift;
-        warn "$tweet->{user}{screen_name}: $tweet->{text}\n";
+        print "$tweet->{user}{screen_name}: $tweet->{text}\n";
     },
     on_error => sub {
         my $error = shift;
