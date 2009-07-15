@@ -12,7 +12,6 @@ use MIME::Base64;
 use URI;
 
 my %methods = map { $_ => 1 } qw( firehose gardenhose spritzer birddog shadow follow track );
-my %handles;
 
 sub new {
     my $class = shift;
@@ -34,7 +33,8 @@ sub new {
     my $uri = URI->new("http://stream.twitter.com/$method.json");
     $uri->query_form(%args);
 
-    my $handle;
+    my $self = bless {}, $class;
+
     http_get $uri,
         headers => { Authorization => "Basic $auth" },
         on_header => sub {
@@ -46,12 +46,12 @@ sub new {
         },
         want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
         sub {
-            ($handle, my $headers) = @_;
+            my ($handle, $headers) = @_;
+            Scalar::Util::weaken($self);
+            $self->{_handle} = $handle;
 
             if ($handle) {
-                $handles{$handle} = $handle;
                 $handle->on_eof(sub {
-                    delete $handles{$_[0]};
                     undef $_[0];
                     $on_eof->(@_);
                 });
@@ -62,10 +62,11 @@ sub new {
                     $handle->push_read(line => $reader);
                 };
                 $handle->push_read(line => $reader);
+                $self->{guard} = AnyEvent::Util::guard { undef $reader };
             }
         };
 
-    defined wantarray && AnyEvent::Util::guard { delete $handles{$handle}; undef $handle };
+    return $self;
 }
 
 1;
@@ -88,7 +89,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
   use AnyEvent::Twitter::Stream;
 
   # receive updates from @following_ids
-  AnyEvent::Twitter::Stream->new(
+  my $listener = AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
       method   => "follow",
