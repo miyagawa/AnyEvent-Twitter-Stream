@@ -57,7 +57,7 @@ sub new {
                 });
                 my $reader; $reader = sub {
                     my($handle, $json) = @_;
-                    # Twitter strem return "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
+                    # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
                     if ($json) {
                         my $tweet = JSON::decode_json($json);
                         $on_tweet->($tweet);
