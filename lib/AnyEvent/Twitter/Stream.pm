@@ -35,7 +35,7 @@ sub new {
 
     my $self = bless {}, $class;
 
-    http_get $uri,
+    $self->{connection_guard} = http_get $uri,
         headers => { Authorization => "Basic $auth" },
         on_header => sub {
             my($headers) = @_;
@@ -47,7 +47,6 @@ sub new {
         want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
         sub {
             my ($handle, $headers) = @_;
-            Scalar::Util::weaken($self);
             $self->{_handle} = $handle;
 
             if ($handle) {
@@ -68,6 +67,7 @@ sub new {
                 $self->{guard} = AnyEvent::Util::guard { undef $reader };
             }
         };
+    Scalar::Util::weaken($self);
 
     return $self;
 }
