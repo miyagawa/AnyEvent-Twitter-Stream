@@ -47,11 +47,11 @@ sub new {
         want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
         sub {
             my ($handle, $headers) = @_;
-            $self->{_handle} = $handle;
+            Scalar::Util::weaken($self);
 
             if ($handle) {
                 $handle->on_eof(sub {
-                    undef $_[0];
+                    undef $handle;
                     $on_eof->(@_);
                 });
                 my $reader; $reader = sub {
@@ -64,10 +64,9 @@ sub new {
                     $handle->push_read(line => $reader);
                 };
                 $handle->push_read(line => $reader);
-                $self->{guard} = AnyEvent::Util::guard { undef $reader };
+                $self->{guard} = AnyEvent::Util::guard { $on_eof->(); $handle->destroy; undef $reader  };
             }
         };
-    Scalar::Util::weaken($self);
 
     return $self;
 }

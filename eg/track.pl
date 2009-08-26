@@ -34,4 +34,7 @@ my $streamer = AnyEvent::Twitter::Stream->new(
     },
 );
 
+# uncomment to test undef $streamer
+# my $t = AE::timer 1, 0, sub { undef $streamer };
+
 $done->recv;
