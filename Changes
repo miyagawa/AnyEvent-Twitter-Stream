@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.04  Wed Aug 26 01:59:30 PDT 2009
+        - test_requires Test::TCP
+
 0.03  Tue Aug 25 19:08:29 PDT 2009
         - Fixed a bug where undef $client doesn't really disconnect
           (Thanks to Daisuke Murase)
