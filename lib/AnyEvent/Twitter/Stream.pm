@@ -11,7 +11,7 @@ use JSON;
 use MIME::Base64;
 use URI;
 
-my %methods = map { $_ => 1 } qw( firehose gardenhose spritzer birddog shadow follow track );
+my %methods = map { $_ => 1 } qw( firehose sample filter );
 
 sub new {
     my $class = shift;
@@ -30,7 +30,7 @@ sub new {
 
     my $auth = MIME::Base64::encode("$username:$password");
 
-    my $uri = URI->new("http://stream.twitter.com/$method.json");
+    my $uri = URI->new("http://stream.twitter.com/1/statuses/$method.json");
     $uri->query_form(%args);
 
     my $self = bless {}, $class;

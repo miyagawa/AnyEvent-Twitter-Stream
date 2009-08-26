@@ -1,5 +1,11 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.05  Wed Aug 26 16:31:52 PDT 2009
+        - Unbreak the refcount stuff introduced in 0.03
+        - BACKWARD INCOMPATIBLE: method names should now be either 'firehose', 'sample' or 'filter'
+          per Twitter API update.
+          http://groups.google.com/group/twitter-development-talk/browse_frm/thread/44bd32155dbf2c16
+
 0.04  Wed Aug 26 01:59:30 PDT 2009
         - test_requires Test::TCP
 

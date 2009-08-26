@@ -9,8 +9,10 @@ my($user, $password, $method, $args) = @ARGV;
 my %args;
 if ($method eq 'follow') {
     $args{follow} = $args;
+    $method = 'filter';
 } elsif ($method eq 'track') {
     $args{track}  = $args;
+    $method = 'filter';
 }
 
 binmode STDOUT, ":utf8";
@@ -18,7 +20,7 @@ binmode STDOUT, ":utf8";
 my $streamer = AnyEvent::Twitter::Stream->new(
     username => $user,
     password => $password,
-    method   => $method || "spritzer",
+    method   => $method || "sample",
     %args,
     on_tweet => sub {
         my $tweet = shift;
