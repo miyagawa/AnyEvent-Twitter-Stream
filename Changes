@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.03  Tue Aug 25 19:08:29 PDT 2009
+        - Fixed a bug where undef $client doesn't really disconnect
+          (Thanks to Daisuke Murase)
+
 0.02  Sat Jul 18 18:20:18 PDT 2009
         - Ignore newline when kee-alive empty line is coming when no tweets are there
           (Thanks to Masayoshi Sekimura)
