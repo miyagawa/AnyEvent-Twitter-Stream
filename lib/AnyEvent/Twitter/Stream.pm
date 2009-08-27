@@ -20,6 +20,7 @@ sub new {
     my $username = delete $args{username};
     my $password = delete $args{password};
     my $method   = delete $args{method};
+    my $keywords = delete $args{keywords};    
     my $on_tweet = delete $args{on_tweet};
     my $on_error = delete $args{on_error} || sub { die @_ };
     my $on_eof   = delete $args{on_eof}   || sub {};
@@ -29,14 +30,27 @@ sub new {
     }
 
     my $auth = MIME::Base64::encode("$username:$password");
+    chomp($auth);
 
     my $uri = URI->new("http://stream.twitter.com/1/statuses/$method.json");
     $uri->query_form(%args);
 
     my $self = bless {}, $class;
 
-    $self->{connection_guard} = http_get $uri,
-        headers => { Authorization => "Basic $auth" },
+    my @initial_args = ($uri);
+    my $sender = \&http_get;
+    if ($method eq 'filter' and $keywords) {
+        $sender = \&http_post;
+        push @initial_args,"track=$keywords";        
+    }    
+
+    $self->{connection_guard} = $sender->(@initial_args,        
+        headers => { 
+            'User-agent' => 'curl/7.18.2',
+            Authorization => "Basic $auth",
+            'Content-Type' =>  'application/x-www-form-urlencoded',
+            Accept => '*/*'
+        },
         on_header => sub {
             my($headers) = @_;
             if ($headers->{Status} ne '200') {
@@ -66,7 +80,7 @@ sub new {
                 $handle->push_read(line => $reader);
                 $self->{guard} = AnyEvent::Util::guard { $on_eof->(); $handle->destroy; undef $reader  };
             }
-        };
+        });
 
     return $self;
 }
