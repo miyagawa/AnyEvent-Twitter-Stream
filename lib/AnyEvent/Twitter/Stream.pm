@@ -41,8 +41,7 @@ sub new {
         return $on_error->("Method $method not available.");
     }
 
-    my $auth = MIME::Base64::encode("$username:$password");
-    chomp($auth);
+    my $auth = MIME::Base64::encode("$username:$password", '');
 
     my $uri = URI->new("http://stream.twitter.com/1/statuses/$method.json");
     $uri->query_form(%args);
