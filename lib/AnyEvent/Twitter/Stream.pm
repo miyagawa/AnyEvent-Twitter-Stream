@@ -46,7 +46,6 @@ sub new {
 
     $self->{connection_guard} = $sender->(@initial_args,        
         headers => { 
-            'User-agent' => 'curl/7.18.2',
             Authorization => "Basic $auth",
             'Content-Type' =>  'application/x-www-form-urlencoded',
             Accept => '*/*'
