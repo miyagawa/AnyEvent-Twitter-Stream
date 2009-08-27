@@ -10,8 +10,14 @@ use AnyEvent::Util;
 use JSON;
 use MIME::Base64;
 use URI;
+use List::Util qw(first);
+use Carp;
 
-my %methods = map { $_ => 1 } qw( firehose sample filter );
+my %methods = (
+    firehose => [],
+    sample   => [],
+    filter   => [ qw(track follow) ]
+);
 
 sub new {
     my $class = shift;
@@ -20,10 +26,16 @@ sub new {
     my $username = delete $args{username};
     my $password = delete $args{password};
     my $method   = delete $args{method};
-    my $keywords = delete $args{keywords};    
     my $on_tweet = delete $args{on_tweet};
     my $on_error = delete $args{on_error} || sub { die @_ };
     my $on_eof   = delete $args{on_eof}   || sub {};
+    
+    my ($param_name,$param_value);
+    foreach my $key (keys %methods) {
+        $param_name = first { defined $args{$_} } @{$methods{$key}};
+        $method = $key, $param_value = $args{$param_name}, last 
+            if defined $param_name;
+    }                
 
     unless ($methods{$method}) {
         return $on_error->("Method $method not available.");
@@ -39,9 +51,9 @@ sub new {
 
     my @initial_args = ($uri);
     my $sender = \&http_get;
-    if ($method eq 'filter' and $keywords) {
+    if ($method eq 'filter') {
         $sender = \&http_post;
-        push @initial_args,"track=$keywords";        
+        push @initial_args,"$param_name=$param_value";        
     }    
 
     $self->{connection_guard} = $sender->(@initial_args,        
