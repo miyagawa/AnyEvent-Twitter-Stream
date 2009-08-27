@@ -30,16 +30,18 @@ sub new {
     my $on_tweet = delete $args{on_tweet};
     my $on_error = delete $args{on_error} || sub { die @_ };
     my $on_eof   = delete $args{on_eof}   || sub {};
-    
-    my ($param_name,$param_value);
-    foreach my $key (keys %methods) {
-        $param_name = first { defined $args{$_} } @{$methods{$key}};
-        $method = $key, $param_value = $args{$param_name}, last 
-            if defined $param_name;
-    }                
 
     unless ($methods{$method}) {
         return $on_error->("Method $method not available.");
+    }
+
+    my($param_name, $param_value);
+    for my $param ( @{$methods{$method}}) {
+        if (defined $args{$param}) {
+            $param_name = $param;
+            $param_value = delete $args{$param};
+            last;
+        }
     }
 
     my $auth = MIME::Base64::encode("$username:$password", '');
@@ -56,8 +58,8 @@ sub new {
         push @initial_args, "$param_name=" . URI::Escape::uri_escape($param_value);
     }
 
-    $self->{connection_guard} = $sender->(@initial_args,        
-        headers => { 
+    $self->{connection_guard} = $sender->(@initial_args,
+        headers => {
             Authorization => "Basic $auth",
             'Content-Type' =>  'application/x-www-form-urlencoded',
             Accept => '*/*'
