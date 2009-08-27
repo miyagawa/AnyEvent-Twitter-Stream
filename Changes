@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.06  Thu Aug 27 10:08:07 PDT 2009
+        - filter track/follow params should be POST not GET (megamic)
+
 0.05  Wed Aug 26 16:31:52 PDT 2009
         - Unbreak the refcount stuff introduced in 0.03
         - BACKWARD INCOMPATIBLE: method names should now be either 'firehose', 'sample' or 'filter'
