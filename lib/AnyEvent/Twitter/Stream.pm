@@ -11,6 +11,7 @@ use JSON;
 use MIME::Base64;
 use URI;
 use List::Util qw(first);
+use URI::Escape;
 use Carp;
 
 my %methods = (
@@ -52,8 +53,8 @@ sub new {
     my $sender = \&http_get;
     if ($method eq 'filter') {
         $sender = \&http_post;
-        push @initial_args,"$param_name=$param_value";        
-    }    
+        push @initial_args, "$param_name=" . URI::Escape::uri_escape($param_value);
+    }
 
     $self->{connection_guard} = $sender->(@initial_args,        
         headers => { 
