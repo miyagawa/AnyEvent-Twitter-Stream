@@ -121,7 +121,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
   my $listener = AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
-      method   => "follow",
+      method   => "filter",  # "firehose" for everything, "sample" for sample timeline
       follow   => join(",", @following_ids),
       on_tweet => sub {
           my $tweet = shift;
@@ -133,8 +133,8 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
   my $guard = AnyEvent::Twitter::Stream->new(
       username => $user,
       password => $password,
-      method   => "track",
-      keyword  => "Perl,Test,Music",
+      method   => "filter",
+      track    => "Perl,Test,Music",
       on_tweet => sub { },
   );
 
