@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.07  Mon Aug 31 04:06:18 PDT 2009
+        - Fixed POD code to match with 0.05 API
+
 0.06  Thu Aug 27 10:08:07 PDT 2009
         - filter track/follow params should be POST not GET (megamic)
 
