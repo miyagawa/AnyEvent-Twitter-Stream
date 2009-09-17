@@ -77,6 +77,10 @@ sub new {
             Scalar::Util::weaken($self);
 
             if ($handle) {
+                $handle->on_error(sub {
+                    undef $handle;
+                    $on_error->(@_);
+                });
                 $handle->on_eof(sub {
                     undef $handle;
                     $on_eof->(@_);
