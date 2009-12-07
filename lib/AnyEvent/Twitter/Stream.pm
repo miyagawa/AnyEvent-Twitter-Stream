@@ -10,7 +10,6 @@ use AnyEvent::Util;
 use JSON;
 use MIME::Base64;
 use URI;
-use List::Util qw(first);
 use URI::Escape;
 use Carp;
 
@@ -30,6 +29,12 @@ sub new {
     my $on_tweet = delete $args{on_tweet};
     my $on_error = delete $args{on_error} || sub { die @_ };
     my $on_eof   = delete $args{on_eof}   || sub {};
+    my $on_keepalive = delete $args{on_keepalive} || sub {};
+    my $timeout  = delete $args{timeout};
+
+    my $set_timeout = $timeout
+        ? sub { AnyEvent->timer(after => $timeout, cb => sub { $on_error->('timeout') }) }
+        : sub {};
 
     unless ($methods{$method}) {
         return $on_error->("Method $method not available.");
@@ -58,6 +63,7 @@ sub new {
         push @initial_args, "$param_name=" . URI::Escape::uri_escape($param_value);
     }
 
+    $self->{timeout} = $set_timeout->();
     $self->{connection_guard} = $sender->(@initial_args,
         headers => {
             Authorization => "Basic $auth",
@@ -88,9 +94,13 @@ sub new {
                 my $reader; $reader = sub {
                     my($handle, $json) = @_;
                     # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
+                    $self->{timeout} = $set_timeout->();
                     if ($json) {
                         my $tweet = JSON::decode_json($json);
                         $on_tweet->($tweet);
+                    }
+                    else {
+                        $on_keepalive->();
                     }
                     $handle->push_read(line => $reader);
                 };
@@ -131,6 +141,10 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
           my $tweet = shift;
           warn "$tweet->{user}{screen_name}: $tweet->{text}\n";
       },
+      on_keepalive => sub {
+          warn "ping\n";
+      },
+      timeout => 45,
   );
 
   # track keywords
