@@ -52,14 +52,14 @@ sub new {
     my $uri = URI->new("http://$STREAMING_SERVER/1/statuses/$method.json");
     $uri->query_form(%args);
 
-    my $self = bless {}, $class;
-
-    my @initial_args = ($uri);
-    my $sender = \&http_get;
+    my $request_method = 'GET';
+    my $request_body;
     if ($method eq 'filter') {
-        $sender = \&http_post;
-        push @initial_args, "$param_name=" . URI::Escape::uri_escape($param_value);
+        $request_method = 'POST';
+        $request_body = "$param_name=" . URI::Escape::uri_escape($param_value);
     }
+
+    my $self = bless {}, $class;
 
     {
         Scalar::Util::weaken(my $self = $self);
@@ -70,12 +70,13 @@ sub new {
 
         $set_timeout->();
 
-        $self->{connection_guard} = $sender->(@initial_args,
+        $self->{connection_guard} = http_request($request_method, $uri,
             headers => {
                 Authorization => "Basic $auth",
                 'Content-Type' =>  'application/x-www-form-urlencoded',
                 Accept => '*/*'
             },
+            body => $request_body,
             on_header => sub {
                 my($headers) = @_;
                 if ($headers->{Status} ne '200') {
