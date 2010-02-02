@@ -12,7 +12,6 @@ use MIME::Base64;
 use URI;
 use URI::Escape;
 use Carp;
-use Data::Dumper;
 
 our $STREAMING_SERVER = 'stream.twitter.com';
 
