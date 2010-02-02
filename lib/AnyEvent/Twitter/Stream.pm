@@ -13,6 +13,8 @@ use URI;
 use URI::Escape;
 use Carp;
 
+our $STREAMING_SERVER = 'stream.twitter.com';
+
 my %methods = (
     firehose => [],
     sample   => [],
@@ -51,7 +53,7 @@ sub new {
 
     my $auth = MIME::Base64::encode("$username:$password", '');
 
-    my $uri = URI->new("http://stream.twitter.com/1/statuses/$method.json");
+    my $uri = URI->new("http://$STREAMING_SERVER/1/statuses/$method.json");
     $uri->query_form(%args);
 
     my $self = bless {}, $class;
