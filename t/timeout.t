@@ -28,7 +28,7 @@ test_tcp(
 			{
 				my $done = AE::cv;
 				my $streamer = AnyEvent::Twitter::Stream->new(
-					usename => 'u',
+					username => 'u',
 					password => 'p',
 					method => 'filter',
 					track => $w,
