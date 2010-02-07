@@ -72,9 +72,12 @@ sub new {
 
         $self->{connection_guard} = http_request($request_method, $uri,
             headers => {
+                Accept => '*/*',
                 Authorization => "Basic $auth",
-                'Content-Type' =>  'application/x-www-form-urlencoded',
-                Accept => '*/*'
+                ($request_method eq 'POST'
+                    ? ('Content-Type' => 'application/x-www-form-urlencoded')
+                    : ()
+                ),
             },
             body => $request_body,
             on_header => sub {

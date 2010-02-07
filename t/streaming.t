@@ -9,6 +9,10 @@ use Test::More;
 use Test::TCP;
 use Test::Requires qw(Plack::Builder Plack::Request Plack::Server::AnyEvent Try::Tiny);
 
+if ($Plack::Request::VERSION < 0.99) {
+    plan(skip_all => 'need Plack::Request >= 0.99');
+}
+
 my @pattern = (
     {
         method => 'sample',
@@ -114,7 +118,7 @@ sub run_streaming_server {
                 path => $req->path,
                 request_method => $req->method,
                 user => $env->{REMOTE_USER},
-                param => $req->parameters,
+                param => $req->parameters->mixed,
             }) . "\x0D\x0A");
 
             my $count = 1;
