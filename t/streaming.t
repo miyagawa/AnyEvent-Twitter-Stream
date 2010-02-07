@@ -9,7 +9,6 @@ use Test::More;
 use Test::TCP;
 use Test::Requires qw(Plack::Builder Plack::Request Plack::Server::AnyEvent Try::Tiny);
 
-my $verbose = 0;
 my @pattern = (
     {
         method => 'sample',
@@ -40,7 +39,7 @@ test_tcp(
             my $received = 0;
             my $count_max = 5;
 
-            diag("try $item->{method}");
+            note("try $item->{method}");
 
             {
                 my $done = AE::cv;
@@ -53,7 +52,7 @@ test_tcp(
                         my $tweet = shift;
 
                         if ($tweet->{hello}) {
-                            warn Dumper $tweet if $verbose;
+                            note(Dumper $tweet);
                             is($tweet->{user}, 'test');
                             is($tweet->{path}, "/1/statuses/$item->{method}.json");
                             is_deeply($tweet->{param}, $item->{option});
@@ -70,9 +69,8 @@ test_tcp(
                         $received++;
                     },
                     on_error => sub {
-                        my $msg = $_[0] || $_[2];
-                        warn "on_error: $msg" if $verbose;
-                        fail("error");
+                        my $msg = $_[2] || $_[0];
+                        fail("on_error: $msg");
                         $done->send;
                     },
                     %{$item->{option}},

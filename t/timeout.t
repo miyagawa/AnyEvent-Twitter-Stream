@@ -8,7 +8,6 @@ use Test::More;
 use Test::TCP;
 use Test::Requires qw(AnyEvent::HTTPD);
 
-my $verbose = 0;
 my %pattern = (
     wait_0_0_0 => 3,
     wait_5_0_0 => 0,
@@ -38,12 +37,12 @@ test_tcp(
                         my $tweet = shift;
                         $done->send, return if $tweet->{count} > 2;
 
-                        warn Dumper $tweet if $verbose;
+                        note(Dumper $tweet);
                         $received++;
                     },
                     on_error => sub {
-                        my $msg = $_[0] || $_[2];
-                        warn "on_error: $msg" if $verbose;
+                        my $msg = $_[2] || $_[0];
+                        note("on_error: $msg");
                         $done->send;
                     }
                 );
@@ -107,7 +106,7 @@ sub get_mock_httpd {
             my ($httpd, $req) = @_;
             my $u = $req->url->clone;
             $u->query_form($req->vars);
-            warn "request: $u" if $verbose;
+            note("request: $u");
         },
     );
 
