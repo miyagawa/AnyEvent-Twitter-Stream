@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.10  Sat Feb  6 17:55:28 PST 2010
+        - Fixed a possible memory leak (hidekiy)
+
 0.09  Mon Dec  7 16:45:06 PST 2009
         - Added on_keepalive and timeout options (Marc Mims)
 
