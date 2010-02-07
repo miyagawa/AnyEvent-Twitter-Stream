@@ -7,11 +7,8 @@ use Data::Dumper;
 use JSON;
 use Test::More;
 use Test::TCP;
-use Test::Requires qw(Plack::Builder Plack::Request Plack::Server::AnyEvent Try::Tiny);
-
-if ($Plack::Request::VERSION < 0.99) {
-    plan(skip_all => 'need Plack::Request >= 0.99');
-}
+use Test::Requires qw(Plack::Builder Plack::Server::AnyEvent Try::Tiny);
+use Test::Requires { 'Plack::Request' => '0.99' };
 
 my @pattern = (
     {
