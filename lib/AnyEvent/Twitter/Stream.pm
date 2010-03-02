@@ -7,7 +7,6 @@ our $VERSION = '0.10';
 use AnyEvent;
 use AnyEvent::HTTP;
 use AnyEvent::Util;
-use JSON;
 use MIME::Base64;
 use URI;
 use URI::Escape;
@@ -33,6 +32,12 @@ sub new {
     my $on_eof   = delete $args{on_eof}   || sub {};
     my $on_keepalive = delete $args{on_keepalive} || sub {};
     my $timeout  = delete $args{timeout};
+
+    my $decode_json;
+    unless (delete $args{no_decode_json}) {
+        require JSON;
+        $decode_json = 1;
+    }
 
     unless ($methods{$method}) {
         return $on_error->("Method $method not available.");
@@ -105,7 +110,7 @@ sub new {
                         # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
                         $set_timeout->();
                         if ($json) {
-                            my $tweet = JSON::decode_json($json);
+                            my $tweet = $decode_json ? JSON::decode_json($json) : $json;
                             $on_tweet->($tweet);
                         }
                         else {
