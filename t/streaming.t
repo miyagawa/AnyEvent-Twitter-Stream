@@ -7,8 +7,8 @@ use Data::Dumper;
 use JSON;
 use Test::More;
 use Test::TCP;
-use Test::Requires qw(Plack::Builder Plack::Server::AnyEvent Try::Tiny);
-use Test::Requires { 'Plack::Request' => '0.99' };
+use Test::Requires qw(Plack::Builder Try::Tiny);
+use Test::Requires { 'Plack::Request' => '0.99', 'Plack::Server::AnyEvent' => '0.03' };
 
 my @pattern = (
     {
