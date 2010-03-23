@@ -4,16 +4,7 @@ use AnyEvent::Twitter::Stream;
 
 my $done = AnyEvent->condvar;
 
-my($user, $password, $method, $args) = @ARGV;
-
-my %args;
-if ($method eq 'follow') {
-    $args{follow} = $args;
-    $method = 'filter';
-} elsif ($method eq 'track') {
-    $args{track}  = $args;
-    $method = 'filter';
-}
+my($user, $password, $method, %args) = @ARGV;
 
 binmode STDOUT, ":utf8";
 
