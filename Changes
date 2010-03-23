@@ -1,5 +1,11 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.12  Tue Mar 23 12:55:01 PDT 2010
+        - Support new 'locations' parameter for 'filter' method (requested by M. Edward (Ed) Borasky)
+        - Support multiple post parameters for 'filter'.
+          ... I thought this has been there for a while but it wasn't.
+        - Support partner-only endpoints: links and retweet        
+
 0.11  Mon Mar  1 17:12:37 PST 2010
         - Added 'no_decode_json' option that passes the undecoded raw JSON to the callback
 
