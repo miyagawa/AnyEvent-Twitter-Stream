@@ -2,7 +2,11 @@
 use strict;
 use AnyEvent::Twitter::Stream;
 
-my $done = AnyEvent->condvar;
+if ($ENV{FIREHOSE_SERVER}) {
+    $AnyEvent::Twitter::Stream::STREAMING_SERVER = $ENV{FIREHOSE_SERVER};
+}
+
+my $done = AE::cv;
 
 my($user, $password, $method, %args) = @ARGV;
 

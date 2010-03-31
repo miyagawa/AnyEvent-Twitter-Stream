@@ -99,7 +99,7 @@ sub new {
                 if ($handle) {
                     $handle->on_error(sub {
                         undef $handle;
-                        $on_error->(@_);
+                        $on_error->($_[2]);
                     });
                     $handle->on_eof(sub {
                         undef $handle;
@@ -119,7 +119,7 @@ sub new {
                         $handle->push_read(line => $reader);
                     };
                     $handle->push_read(line => $reader);
-                    $self->{guard} = AnyEvent::Util::guard { $on_eof->(); $handle->destroy; undef $reader };
+                    $self->{guard} = AnyEvent::Util::guard { $on_eof->(); $handle->destroy if $handle; undef $reader };
                 }
             }
         );
