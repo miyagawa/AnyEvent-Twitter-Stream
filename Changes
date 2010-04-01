@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.13  Thu Apr  1 14:00:35 PDT 2010
+        - Fixed an error when HTTP connection is disconnected
+          http://rt.cpan.org/Public/Bug/Display.html?id=55798
+
 0.12  Tue Mar 23 12:55:01 PDT 2010
         - Support new 'locations' parameter for 'filter' method (requested by M. Edward (Ed) Borasky)
         - Support multiple post parameters for 'filter'.
