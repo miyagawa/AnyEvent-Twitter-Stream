@@ -6,7 +6,8 @@ use Data::Dumper;
 use JSON;
 use Test::More;
 use Test::TCP;
-use Test::Requires qw(AnyEvent::HTTPD);
+use Test::Requires qw(Plack::Builder Plack::Handler::Twiggy Try::Tiny);
+use Test::Requires { 'Plack::Request' => '0.99' };
 
 my %pattern = (
     wait_0_0_0 => 3,
@@ -28,8 +29,8 @@ test_tcp(
             {
                 my $done = AE::cv;
                 my $streamer = AnyEvent::Twitter::Stream->new(
-                    username => 'u',
-                    password => 'p',
+                    username => 'test',
+                    password => 's3cr3t',
                     method => 'filter',
                     track => $w,
                     timeout => 2,
@@ -58,65 +59,73 @@ test_tcp(
     server => sub {
         my $port = shift;
 
-        my $httpd = get_mock_httpd($port);
-        $httpd->run;
+        run_streaming_server($port);
     },
 );
 
 done_testing();
 
 
-sub get_mock_httpd {
+sub run_streaming_server {
     my $port = shift;
-    my $httpd = AnyEvent::HTTPD->new(port => $port);
 
-    $httpd->reg_cb(
-        '/1/statuses/filter.json' => sub {
-            my ($httpd, $req) = @_;
+    my $streaming = sub {
+        my $env = shift;
+        my $req = Plack::Request->new($env);
 
-            my $track = $req->parm('track');
-            my (undef, $wait_a, $wait_b, $wait_c) = split(/_/, $track);
+        my $track = $req->param('track');
+        my (undef, $wait_a, $wait_b, $wait_c) = split(/_/, $track);
 
-            my $t; $t = AE::timer $wait_a, 0, sub {
-                my $count = 0;
-                $req->respond([200, 'OK', {'Content-Type' => 'application/json'}, sub {
-                    my $data_cb = shift;
-                    return unless $data_cb;
+        return sub {
+            my $respond = shift;
 
-                    my $after;
+            my $count = 0;
+            my $writer;
 
-                    if ($count == 0) {
-                        $after = $wait_b;
-                    } elsif ($count == 1) {
-                        $after = $wait_c;
-                    } else {
-                        $after = 1;
-                    }
+            my $send_tweet = sub {
+                my ($tweet) = @_;
 
-                    send_delayed_tweet($data_cb, $after, {count => $count++, rand => rand});
-                }]);
-
-                undef $t;
+                try {
+                    $writer->write(encode_json({count => $count++, rand => rand}) . "\x0D\x0A");
+                } catch {
+                    note($_);
+                };
             };
 
-            $httpd->stop_request;
-        },
+            my $t1; $t1 = AE::timer $wait_a, 0, sub {
+                $writer = $respond->([200, [
+                    'Content-Type' => 'application/json'
+                ]]);
 
-        request => sub {
-            my ($httpd, $req) = @_;
-            my $u = $req->url->clone;
-            $u->query_form($req->vars);
-            note("request: $u");
-        },
-    );
+                undef $t1;
+            };
 
-    return $httpd;
-}
-sub send_delayed_tweet {
-    my ($data_cb, $after, $tweet) = @_;
+            my $t2; $t2 = AE::timer $wait_a + $wait_b, 0, sub {
+                $send_tweet->();
 
-    my $t; $t = AE::timer $after, 0, sub {
-        $data_cb->(encode_json($tweet) . "\r\n");
-        undef $t;
+                undef $t2;
+            };
+
+            my $t3; $t3 = AE::timer $wait_a + $wait_b + $wait_c, 0.5, sub {
+                $send_tweet->();
+
+                $t3;
+            };
+        };
     };
+
+
+    my $app = builder {
+        enable 'Auth::Basic', realm => 'Firehose', authenticator => sub {
+            my ($user, $pass) = @_;
+
+            return $user eq 'test' && $pass eq 's3cr3t';
+        };
+        mount '/1/' => $streaming;
+    };
+
+    my $server = Plack::Handler::Twiggy->new(
+        host => '127.0.0.1',
+        port => $port,
+    )->run($app);
 }

@@ -7,8 +7,8 @@ use Data::Dumper;
 use JSON;
 use Test::More;
 use Test::TCP;
-use Test::Requires qw(Plack::Builder Try::Tiny);
-use Test::Requires { 'Plack::Request' => '0.99', 'Plack::Server::AnyEvent' => '0.03' };
+use Test::Requires qw(Plack::Builder Plack::Handler::Twiggy Try::Tiny);
+use Test::Requires { 'Plack::Request' => '0.99' };
 
 my @pattern = (
     {
@@ -160,7 +160,7 @@ sub run_streaming_server {
         mount '/1/' => $streaming;
     };
 
-    my $server = Plack::Server::AnyEvent->new(
+    my $server = Plack::Handler::Twiggy->new(
         host => '127.0.0.1',
         port => $port,
     )->run($app);
