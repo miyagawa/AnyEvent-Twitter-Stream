@@ -42,7 +42,8 @@ sub new {
     }
 
     unless ($methods{$method}) {
-        return $on_error->("Method $method not available.");
+        $on_error->("Method $method not available.");
+        return;
     }
 
     my %post_args;
@@ -88,7 +89,8 @@ sub new {
             on_header => sub {
                 my($headers) = @_;
                 if ($headers->{Status} ne '200') {
-                    return $on_error->("$headers->{Status}: $headers->{Reason}");
+                    $on_error->("$headers->{Status}: $headers->{Reason}");
+                    return;
                 }
                 return 1;
             },
