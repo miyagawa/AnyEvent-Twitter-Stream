@@ -26,14 +26,18 @@ sub new {
     my $class = shift;
     my %args  = @_;
 
-    my $username = delete $args{username};
-    my $password = delete $args{password};
-    my $method   = delete $args{method};
-    my $on_tweet = delete $args{on_tweet};
-    my $on_error = delete $args{on_error} || sub { die @_ };
-    my $on_eof   = delete $args{on_eof}   || sub {};
-    my $on_keepalive = delete $args{on_keepalive} || sub {};
-    my $timeout  = delete $args{timeout};
+    my $username        = delete $args{username};
+    my $password        = delete $args{password};
+    my $consumer_key    = delete $args{consumer_key};
+    my $consumer_secret = delete $args{consumer_secret};
+    my $token           = delete $args{token};
+    my $token_secret    = delete $args{token_secret};
+    my $method          = delete $args{method};
+    my $on_tweet        = delete $args{on_tweet};
+    my $on_error        = delete $args{on_error} || sub { die @_ };
+    my $on_eof          = delete $args{on_eof} || sub { };
+    my $on_keepalive    = delete $args{on_keepalive} || sub { };
+    my $timeout         = delete $args{timeout};
 
     my $decode_json;
     unless (delete $args{no_decode_json}) {
@@ -53,8 +57,6 @@ sub new {
         }
     }
 
-    my $auth = MIME::Base64::encode("$username:$password", '');
-
     my $uri = URI->new("http://$STREAMING_SERVER/1/statuses/$method.json");
     $uri->query_form(%args);
 
@@ -63,6 +65,29 @@ sub new {
     if ($method eq 'filter') {
         $request_method = 'POST';
         $request_body = join '&', map "$_=" . URI::Escape::uri_escape($post_args{$_}), keys %post_args;
+    }
+
+    my $auth;
+    if ($consumer_key) {
+        eval {require Net::OAuth;};
+        die $@ if $@;
+        my $request = Net::OAuth->request('protected resource')->new(
+            version          => '1.0',
+            consumer_key     => $consumer_key,
+            consumer_secret  => $consumer_secret,
+            token            => $token,
+            token_secret     => $token_secret,
+            request_method   => $request_method,
+            signature_method => 'HMAC-SHA1',
+            timestamp        => time,
+            nonce            => MIME::Base64::encode( time . $$ . rand ),
+            request_url      => $uri,
+            extra_params     => \%post_args,
+        );
+        $request->sign;
+        $auth = $request->to_authorization_header;
+    }else{
+        $auth = "Basic ".MIME::Base64::encode("$username:$password", '');
     }
 
     my $self = bless {}, $class;
@@ -79,7 +104,7 @@ sub new {
         $self->{connection_guard} = http_request($request_method, $uri,
             headers => {
                 Accept => '*/*',
-                Authorization => "Basic $auth",
+                Authorization => $auth,
                 ($request_method eq 'POST'
                     ? ('Content-Type' => 'application/x-www-form-urlencoded')
                     : ()
