@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.14  Mon Aug 16 15:08:41 PDT 2010
+        - Added OAuth support (franck)
+        - Added on_delete event (franck)
+
 0.13  Thu Apr  1 14:00:35 PDT 2010
         - Fixed an error when HTTP connection is disconnected
           http://rt.cpan.org/Public/Bug/Display.html?id=55798
