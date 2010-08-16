@@ -37,6 +37,7 @@ sub new {
     my $on_error        = delete $args{on_error} || sub { die @_ };
     my $on_eof          = delete $args{on_eof} || sub { };
     my $on_keepalive    = delete $args{on_keepalive} || sub { };
+    my $on_delete       = delete $args{on_delete};
     my $timeout         = delete $args{timeout};
 
     my $decode_json;
@@ -139,7 +140,11 @@ sub new {
                         $set_timeout->();
                         if ($json) {
                             my $tweet = $decode_json ? JSON::decode_json($json) : $json;
-                            $on_tweet->($tweet);
+                            if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
+                                $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
+                            }else{
+                                $on_tweet->($tweet);
+                            }
                         }
                         else {
                             $on_keepalive->();
@@ -187,6 +192,10 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
       },
       on_keepalive => sub {
           warn "ping\n";
+      },
+      on_delete => sub {
+          my ($tweet_id, $user_id) = @_; # callback executed when twitter send a delete notification
+          ...
       },
       timeout => 45,
   );

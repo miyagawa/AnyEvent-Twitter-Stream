@@ -29,6 +29,8 @@ my @pattern = (
     },
 );
 
+my $deleted = 0;
+
 test_tcp(
     client => sub {
         my $port = shift;
@@ -69,6 +71,11 @@ test_tcp(
 
                         $received++;
                     },
+                    on_delete => sub {
+                        my ($tweet_id, $user_id) = @_;
+                        $deleted++;
+                        $received++;
+                    },
                     on_error => sub {
                         my $msg = $_[2] || $_[0];
                         fail("on_error: $msg");
@@ -91,6 +98,8 @@ test_tcp(
         run_streaming_server($port);
     },
 );
+
+is $deleted, 1, 'deleted one tweet';
 
 done_testing();
 
@@ -128,6 +137,16 @@ sub run_streaming_server {
                 } catch {
                     undef $t;
                 };
+                if ($req->path =~ /sample/ && $count == 2) {
+                    try {
+                        $writer->write(encode_json({
+                            delete => {status => {id => 1, user_id => 1}},
+                            count => $count++,
+                        }) . "\x0D\x0A");
+                    } catch {
+                        undef $t;
+                    };
+                }
             });
         };
     };
