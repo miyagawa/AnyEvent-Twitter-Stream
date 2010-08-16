@@ -71,6 +71,7 @@ sub new {
     if ($consumer_key) {
         eval {require Net::OAuth;};
         die $@ if $@;
+
         my $request = Net::OAuth->request('protected resource')->new(
             version          => '1.0',
             consumer_key     => $consumer_key,
@@ -164,7 +165,7 @@ __END__
 API AnyEvent
 
 =for test_synopsis
-my($user, $password, @following_ids);
+my($user, $password, @following_ids, $consumer_key, $consumer_secret, $token, $token_secret);
 
 =head1 NAME
 
@@ -197,6 +198,17 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
       method   => "filter",
       track    => "Perl,Test,Music",
       on_tweet => sub { },
+  );
+
+  # to use OAuth authentication
+  my $listener = AnyEvent::Twitter::Stream->new(
+      consumer_key    => $consumer_key,
+      consumer_secret => $consumer_secret,
+      token           => $token,
+      token_secret    => $token_secret,
+      method          => "filter",
+      track           => "...",
+      on_tweet        => sub { ... },
   );
 
 =head1 DESCRIPTION
