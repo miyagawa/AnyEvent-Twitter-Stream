@@ -12,14 +12,17 @@ use URI;
 use URI::Escape;
 use Carp;
 
-our $STREAMING_SERVER = 'stream.twitter.com';
+our $STREAMING_SERVER  = 'stream.twitter.com';
+our $USERSTREAM_SERVER = 'chirpstream.twitter.com';
+our $PROTOCOL          = $ENV{'ANYEVENT_TWITTER_STREAM_SSL'} ? 'https' : 'http';
 
 my %methods = (
-    firehose => [],
-    links    => [],
-    retweet  => [],
-    sample   => [],
-    filter   => [ qw(track follow locations) ],
+    firehose   => [],
+    links      => [],
+    retweet    => [],
+    sample     => [],
+    userstream => [ qw(replies) ],
+    filter     => [ qw(track follow locations) ],
 );
 
 sub new {
@@ -38,6 +41,8 @@ sub new {
     my $on_eof          = delete $args{on_eof} || sub { };
     my $on_keepalive    = delete $args{on_keepalive} || sub { };
     my $on_delete       = delete $args{on_delete};
+    my $on_friends      = delete $args{on_friends};
+    my $on_event        = delete $args{on_event};
     my $timeout         = delete $args{timeout};
 
     my $decode_json;
@@ -52,18 +57,25 @@ sub new {
     }
 
     my %post_args;
-    for my $param ( @{$methods{$method}}) {
-        if (exists $args{$param}) {
+    for my $param ( @{ $methods{$method} } ) {
+        next if $method eq 'userstream' && $param eq 'replies';
+        if ( exists $args{$param} ) {
             $post_args{$param} = delete $args{$param};
         }
     }
 
-    my $uri = URI->new("http://$STREAMING_SERVER/1/statuses/$method.json");
+    my $uri;
+    if ($method eq 'userstream') {
+        $uri = URI->new("$PROTOCOL://$USERSTREAM_SERVER/2b/user.json");
+    }else{
+        $uri = URI->new("$PROTOCOL://$STREAMING_SERVER/1/statuses/$method.json");
+    }
+
     $uri->query_form(%args);
 
     my $request_method = 'GET';
     my $request_body;
-    if ($method eq 'filter') {
+    if ($method eq 'filter' || $method eq 'userstream') {
         $request_method = 'POST';
         $request_body = join '&', map "$_=" . URI::Escape::uri_escape($post_args{$_}), keys %post_args;
     }
@@ -142,6 +154,10 @@ sub new {
                             my $tweet = $decode_json ? JSON::decode_json($json) : $json;
                             if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
                                 $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
+                            }elsif($on_friends && $tweet->{friends}) {
+                                $on_friends->($tweet->{friends});
+                            }elsif($on_event && $tweet->{event}) {
+                                $on_event->($tweet);
                             }else{
                                 $on_tweet->($tweet);
                             }
@@ -223,9 +239,86 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
 =head1 DESCRIPTION
 
 AnyEvent::Twitter::Stream is an AnyEvent user to receive Twitter streaming
-API, available at L<http://apiwiki.twitter.com/Streaming-API-Documentation>
+API, available at L<http://dev.twitter.com/pages/streaming_api> and
+L<http://dev.twitter.com/pages/user_streams>.
 
 See L<eg/track.pl> for more client code example.
+
+=head1 METHODS
+
+=head2 my $streamer = AnyEvent::Twitter::Stream->new(%args);
+
+=over 4
+
+=item B<username> B<password>
+
+These arguments are used for basic authentication.
+
+=item B<consumer_key> B<consumer_secret> B<token> B<token_secret>
+
+If you want to use the OAuth authentication mechanism, you need to set use arguments
+
+=item B<method>
+
+The name of the method you want to use on the stream. Currently, anyone of :
+
+=item B<consumer_key> B<consumer_secret> B<token> B<token_secret>
+
+If you want to use the OAuth authentication mechanism, you need to set these arguments
+
+=item B<method>
+
+The name of the method you want to use on the stream. Currently, anyone of :
+
+=over 2
+
+=item B<firehose>
+
+=item B<links>
+
+=item B<retweet>
+
+=item B<sample>
+
+=item B<userstream>
+
+To use this method, you need to use the OAuth mechanism.
+
+=item B<filter>
+
+With this method you can specify what you want to filter amongst B<track>, B<follow> and B<locations>.
+
+=back
+
+=item B<timeout>
+
+Set the timeout value.
+
+=item B<on_tweet>
+
+Callback to execute when a new tweet is received.
+
+=item B<on_error>
+
+=item B<on_eof>
+
+=item B<on_keepalive>
+
+=item B<on_delete>
+
+Callback to execute when the stream send a delete notification.
+
+=item B<on_friends>
+
+B<Only with the usertream method>. Callback to execute when the stream send a list of friends.
+
+=item B<on_event>
+
+B<Only with the userstream method>. Callback to execute when the stream send an event notification (follow, ...).
+
+=head1 NOTES
+
+To use the B<userstream> method, Twitter recommend using the HTTPS protocol. For this, you need to set the B<ANYEVENT_TWITTER_STREAM_SSL> environment variable, and install the L<Net::SSLeay> module.
 
 =head1 AUTHOR
 
