@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.15  Wed Aug 18 00:48:16 PDT 2010
+        - Updated tests to use Twiggy rather than P::S::AE (hidekiy)
+
 0.14  Mon Aug 16 15:08:41 PDT 2010
         - Added OAuth support (franck)
         - Added on_delete event (franck)
