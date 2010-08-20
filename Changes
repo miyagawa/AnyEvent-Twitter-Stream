@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.16  Fri Aug 20 16:58:14 PDT 2010
+        - Support UserStreams (franck)
+        - SSL support (franck)
+
 0.15  Wed Aug 18 00:48:16 PDT 2010
         - Updated tests to use Twiggy rather than P::S::AE (hidekiy)
 
