@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.17  Mon Sep 13 16:56:59 PDT 2010
+        - Remove artificial on_eof callback when $client gets undef (hachi, miyagawa)
+
 0.16  Fri Aug 20 16:58:14 PDT 2010
         - Support UserStreams (franck)
         - SSL support (franck)
