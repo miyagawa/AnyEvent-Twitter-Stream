@@ -168,7 +168,7 @@ sub new {
                         $handle->push_read(line => $reader);
                     };
                     $handle->push_read(line => $reader);
-                    $self->{guard} = AnyEvent::Util::guard { $on_eof->(); $handle->destroy if $handle; undef $reader };
+                    $self->{guard} = AnyEvent::Util::guard { $handle->destroy if $handle; undef $reader };
                 }
             }
         );
