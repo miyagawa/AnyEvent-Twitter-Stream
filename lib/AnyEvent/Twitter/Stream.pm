@@ -36,6 +36,7 @@ sub new {
     my $token           = delete $args{token};
     my $token_secret    = delete $args{token_secret};
     my $method          = delete $args{method};
+    my $on_connect      = delete $args{on_connect} || sub { };
     my $on_tweet        = delete $args{on_tweet};
     my $on_error        = delete $args{on_error} || sub { die @_ };
     my $on_eof          = delete $args{on_eof} || sub { };
@@ -136,6 +137,8 @@ sub new {
             want_body_handle => 1, # for some reason on_body => sub {} doesn't work :/
             sub {
                 my ($handle, $headers) = @_;
+
+                $on_connect->();
 
                 if ($handle) {
                     $handle->on_error(sub {
@@ -293,6 +296,10 @@ With this method you can specify what you want to filter amongst B<track>, B<fol
 =item B<timeout>
 
 Set the timeout value.
+
+=item B<on_connect>
+
+Callback to execute when a stream is connected.
 
 =item B<on_tweet>
 
