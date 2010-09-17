@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.19  Fri Sep 17 14:44:01 PDT 2010
+        - Fixed on_connect callback so it only gets fired in the real connection, not
+          pseudo callback for 4xx/5xx responses
+
 0.18  Fri Sep 17 14:26:06 PDT 2010
         - Added on_connect callback
 
