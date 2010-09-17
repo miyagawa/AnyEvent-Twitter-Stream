@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.18  Fri Sep 17 14:26:06 PDT 2010
+        - Added on_connect callback
+
 0.17  Mon Sep 13 16:56:59 PDT 2010
         - Remove artificial on_eof callback when $client gets undef (hachi, miyagawa)
 
