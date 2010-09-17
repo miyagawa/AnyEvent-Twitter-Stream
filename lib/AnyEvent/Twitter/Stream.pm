@@ -138,9 +138,9 @@ sub new {
             sub {
                 my ($handle, $headers) = @_;
 
-                $on_connect->();
-
                 if ($handle) {
+                    $on_connect->();
+
                     $handle->on_error(sub {
                         undef $handle;
                         $on_error->($_[2]);
