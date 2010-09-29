@@ -13,7 +13,7 @@ use URI::Escape;
 use Carp;
 
 our $STREAMING_SERVER  = 'stream.twitter.com';
-our $USERSTREAM_SERVER = 'chirpstream.twitter.com';
+our $USERSTREAM_SERVER = 'userstream.twitter.com';
 our $PROTOCOL          = $ENV{'ANYEVENT_TWITTER_STREAM_SSL'} ? 'https' : 'http';
 
 my %methods = (
@@ -67,7 +67,7 @@ sub new {
 
     my $uri;
     if ($method eq 'userstream') {
-        $uri = URI->new("$PROTOCOL://$USERSTREAM_SERVER/2b/user.json");
+        $uri = URI->new("https://$USERSTREAM_SERVER/2/user.json");
     }else{
         $uri = URI->new("$PROTOCOL://$STREAMING_SERVER/1/statuses/$method.json");
     }
