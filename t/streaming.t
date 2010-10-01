@@ -41,6 +41,7 @@ test_tcp(
 
         $AnyEvent::Twitter::Stream::STREAMING_SERVER  = "127.0.0.1:$port";
         $AnyEvent::Twitter::Stream::USERSTREAM_SERVER = "127.0.0.1:$port";
+        $AnyEvent::Twitter::Stream::US_PROTOCOL       = "http";
 
         foreach my $item (@pattern) {
             my $destroyed;
@@ -200,7 +201,7 @@ sub run_streaming_server {
             return $user eq 'test' && $pass eq 's3cr3t';
         };
         mount '/1/' => $streaming;
-        mount '/2b' => $user_stream;
+        mount '/2/' => $user_stream;
     };
 
     my $server = Plack::Handler::Twiggy->new(
