@@ -262,10 +262,6 @@ These arguments are used for basic authentication.
 
 If you want to use the OAuth authentication mechanism, you need to set use arguments
 
-=item B<method>
-
-The name of the method you want to use on the stream. Currently, anyone of :
-
 =item B<consumer_key> B<consumer_secret> B<token> B<token_secret>
 
 If you want to use the OAuth authentication mechanism, you need to set these arguments
