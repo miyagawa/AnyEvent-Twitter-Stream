@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.20  Fri Oct  1 01:10:51 PDT 2010
+        - UserStreams is now live. Updated the host name and protocol to use HTTPS (norm)
+
 0.19  Fri Sep 17 14:44:01 PDT 2010
         - Fixed on_connect callback so it only gets fired in the real connection, not
           pseudo callback for 4xx/5xx responses
