@@ -79,7 +79,7 @@ sub new {
     my $request_body;
     if ($method eq 'filter' || $method eq 'userstream') {
         $request_method = 'POST';
-        $request_body = join '&', map "$_=" . URI::Escape::uri_escape($post_args{$_}), keys %post_args;
+        $request_body = join '&', map "$_=" . URI::Escape::uri_escape_utf8($post_args{$_}), keys %post_args;
     }
 
     my $auth;
