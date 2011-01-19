@@ -154,8 +154,11 @@ sub new {
                         my($handle, $json) = @_;
                         # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
                         $set_timeout->();
-                        if ($json) {
-                            my $tweet = $decode_json ? JSON::decode_json($json) : $json;
+
+                        local $@;
+                        my $tweet = eval { $decode_json ? JSON::decode_json($json) : $json; };
+
+                        if (not $@) {
                             if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
                                 $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
                             }elsif($on_friends && $tweet->{friends}) {
