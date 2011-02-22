@@ -27,13 +27,21 @@ my @pattern = (
         method => 'filter',
         option => {follow => '123123'},
     },
+    {
+        method => 'userstream',
+        option => {},
+    },
 );
+
+my ($deleted, $event) = (0, 0);
 
 test_tcp(
     client => sub {
         my $port = shift;
 
-        $AnyEvent::Twitter::Stream::STREAMING_SERVER = "127.0.0.1:$port";
+        $AnyEvent::Twitter::Stream::STREAMING_SERVER  = "127.0.0.1:$port";
+        $AnyEvent::Twitter::Stream::USERSTREAM_SERVER = "127.0.0.1:$port";
+        $AnyEvent::Twitter::Stream::US_PROTOCOL       = "http";
 
         foreach my $item (@pattern) {
             my $destroyed;
@@ -69,6 +77,19 @@ test_tcp(
 
                         $received++;
                     },
+                    on_delete => sub {
+                        my ($tweet_id, $user_id) = @_;
+                        $deleted++;
+                        $received++;
+                    },
+                    on_friends => sub {
+                        my $friends = shift;
+                        is_deeply($friends, [qw/1 2 3/]);
+                    },
+                    on_event => sub {
+                        $event++;
+                        $done->send;
+                    },
                     on_error => sub {
                         my $msg = $_[2] || $_[0];
                         fail("on_error: $msg");
@@ -81,8 +102,10 @@ test_tcp(
                 $done->recv;
             }
 
-            is($received, $count_max + 1, "received");
-            is($destroyed, 1, "destroyed");
+            if ($item->{method} ne 'userstream') {
+                is($received, $count_max + 1, "received");
+                is($destroyed, 1, "destroyed");
+            }
         }
     },
     server => sub {
@@ -92,8 +115,10 @@ test_tcp(
     },
 );
 
-done_testing();
+is $deleted, 1, 'deleted one tweet';
+is $event, 1, 'got one event';
 
+done_testing();
 
 sub run_streaming_server {
     my $port = shift;
@@ -128,6 +153,43 @@ sub run_streaming_server {
                 } catch {
                     undef $t;
                 };
+                if ($req->path =~ /sample/ && $count == 2) {
+                    try {
+                        $writer->write(encode_json({
+                            delete => {status => {id => 1, user_id => 1}},
+                            count => $count++,
+                        }) . "\x0D\x0A");
+                    } catch {
+                        undef $t;
+                    };
+                }
+            });
+        };
+    };
+
+    my $user_stream = sub {
+        my $env = shift;
+        my $req = Plack::Request->new($env);
+
+        return sub {
+            my $respond = shift;
+
+            my $writer = $respond->([200, [
+                'Content-Type' => 'application/json',
+                'Server' => 'Jetty(6.1.17)',
+            ]]);
+            $writer->write(encode_json({
+                friends => [qw/1 2 3/],
+            }) . "\x0D\x0A");
+
+            my $t; $t = AE::timer(0, 0.2, sub {
+                try {
+                    $writer->write(encode_json({
+                        event => {foo => 'bar'},
+                    }) . "\x0D\x0A");
+                }catch{
+                    undef $t;
+                };
             });
         };
     };
@@ -139,6 +201,7 @@ sub run_streaming_server {
             return $user eq 'test' && $pass eq 's3cr3t';
         };
         mount '/1/' => $streaming;
+        mount '/2/' => $user_stream;
     };
 
     my $server = Plack::Handler::Twiggy->new(

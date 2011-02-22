@@ -1,5 +1,29 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.20  Fri Oct  1 01:10:51 PDT 2010
+        - UserStreams is now live. Updated the host name and protocol to use HTTPS (norm)
+
+0.19  Fri Sep 17 14:44:01 PDT 2010
+        - Fixed on_connect callback so it only gets fired in the real connection, not
+          pseudo callback for 4xx/5xx responses
+
+0.18  Fri Sep 17 14:26:06 PDT 2010
+        - Added on_connect callback
+
+0.17  Mon Sep 13 16:56:59 PDT 2010
+        - Remove artificial on_eof callback when $client gets undef (hachi, miyagawa)
+
+0.16  Fri Aug 20 16:58:14 PDT 2010
+        - Support UserStreams (franck)
+        - SSL support (franck)
+
+0.15  Wed Aug 18 00:48:16 PDT 2010
+        - Updated tests to use Twiggy rather than P::S::AE (hidekiy)
+
+0.14  Mon Aug 16 15:08:41 PDT 2010
+        - Added OAuth support (franck)
+        - Added on_delete event (franck)
+
 0.13  Thu Apr  1 14:00:35 PDT 2010
         - Fixed an error when HTTP connection is disconnected
           http://rt.cpan.org/Public/Bug/Display.html?id=55798
