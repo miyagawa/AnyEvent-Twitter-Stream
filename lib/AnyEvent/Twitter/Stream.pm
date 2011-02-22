@@ -115,6 +115,28 @@ sub new {
             ? sub { $self->{timeout} = AE::timer($timeout, 0, sub { $on_error->('timeout') }) }
             : sub {};
 
+        my $on_json_message = sub {
+            my ($json) = @_;
+
+            # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
+            $set_timeout->();
+            if ($json !~ /^\s*$/) {
+                my $tweet = $decode_json ? JSON::decode_json($json) : $json;
+                if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
+                    $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
+                }elsif($on_friends && $tweet->{friends}) {
+                    $on_friends->($tweet->{friends});
+                }elsif($on_event && $tweet->{event}) {
+                    $on_event->($tweet);
+                }else{
+                    $on_tweet->($tweet);
+                }
+            }
+            else {
+                $on_keepalive->();
+            }
+        };
+
         $set_timeout->();
 
         $self->{connection_guard} = http_request($request_method, $uri,
@@ -139,41 +161,56 @@ sub new {
             sub {
                 my ($handle, $headers) = @_;
 
-                if ($handle) {
-                    $on_connect->();
+                return unless $handle;
 
-                    $handle->on_error(sub {
-                        undef $handle;
-                        $on_error->($_[2]);
+                my $chunk_reader = sub {
+                    my ($handle, $line) = @_;
+
+                    $line =~ /^([0-9a-fA-F]+)/ or die 'bad chunk (incorrect length)';
+                    my $len = hex $1;
+
+                    $handle->push_read(chunk => $len, sub {
+                        my ($handle, $chunk) = @_;
+
+                        $handle->push_read(line => sub {
+                            length $_[1] and die 'bad chunk (missing last empty line)';
+                        });
+
+                        $on_json_message->($chunk);
                     });
-                    $handle->on_eof(sub {
-                        undef $handle;
-                        $on_eof->(@_);
+                };
+                my $line_reader = sub {
+                    my ($handle, $line) = @_;
+
+                    $on_json_message->($line);
+                };
+
+                $handle->on_error(sub {
+                    undef $handle;
+                    $on_error->($_[2]);
+                });
+                $handle->on_eof(sub {
+                    undef $handle;
+                    $on_eof->(@_);
+                });
+
+                if ($headers->{'transfer-encoding'} =~ /\bchunked\b/i) {
+                    $handle->on_read(sub {
+                        my ($handle) = @_;
+                        $handle->push_read(line => $chunk_reader);
                     });
-                    my $reader; $reader = sub {
-                        my($handle, $json) = @_;
-                        # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
-                        $set_timeout->();
-                        if ($json) {
-                            my $tweet = $decode_json ? JSON::decode_json($json) : $json;
-                            if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
-                                $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
-                            }elsif($on_friends && $tweet->{friends}) {
-                                $on_friends->($tweet->{friends});
-                            }elsif($on_event && $tweet->{event}) {
-                                $on_event->($tweet);
-                            }else{
-                                $on_tweet->($tweet);
-                            }
-                        }
-                        else {
-                            $on_keepalive->();
-                        }
-                        $handle->push_read(line => $reader);
-                    };
-                    $handle->push_read(line => $reader);
-                    $self->{guard} = AnyEvent::Util::guard { $handle->destroy if $handle; undef $reader };
+                } else {
+                    $handle->on_read(sub {
+                        my ($handle) = @_;
+                        $handle->push_read(line => $line_reader);
+                    });
                 }
+
+                $self->{guard} = AnyEvent::Util::guard {
+                    $handle->destroy if $handle;
+                };
+
+                $on_connect->();
             }
         );
     }
