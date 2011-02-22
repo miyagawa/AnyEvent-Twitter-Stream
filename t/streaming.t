@@ -33,95 +33,103 @@ my @pattern = (
     },
 );
 
-my ($deleted, $event) = (0, 0);
+foreach my $enable_chunked (0, 1) {
+    test_tcp(
+        client => sub {
+            my $port = shift;
 
-test_tcp(
-    client => sub {
-        my $port = shift;
+            local $AnyEvent::Twitter::Stream::STREAMING_SERVER  = "127.0.0.1:$port";
+            local $AnyEvent::Twitter::Stream::USERSTREAM_SERVER = "127.0.0.1:$port";
+            local $AnyEvent::Twitter::Stream::US_PROTOCOL       = "http";
 
-        $AnyEvent::Twitter::Stream::STREAMING_SERVER  = "127.0.0.1:$port";
-        $AnyEvent::Twitter::Stream::USERSTREAM_SERVER = "127.0.0.1:$port";
-        $AnyEvent::Twitter::Stream::US_PROTOCOL       = "http";
+            foreach my $item (@pattern) {
+                my $destroyed;
+                my $received = 0;
+                my $count_max = 5;
+                my ($deleted, $event) = (0, 0);
 
-        foreach my $item (@pattern) {
-            my $destroyed;
-            my $received = 0;
-            my $count_max = 5;
+                note("try $item->{method}");
 
-            note("try $item->{method}");
+                {
+                    my $done = AE::cv;
+                    my $streamer = AnyEvent::Twitter::Stream->new(
+                        username => 'test',
+                        password => 's3cr3t',
+                        method => $item->{method},
+                        timeout => 2,
+                        on_tweet => sub {
+                            my $tweet = shift;
 
-            {
-                my $done = AE::cv;
-                my $streamer = AnyEvent::Twitter::Stream->new(
-                    username => 'test',
-                    password => 's3cr3t',
-                    method => $item->{method},
-                    timeout => 2,
-                    on_tweet => sub {
-                        my $tweet = shift;
+                            if ($tweet->{hello}) {
+                                note(Dumper $tweet);
+                                is($tweet->{user}, 'test');
+                                is($tweet->{path}, "/1/statuses/$item->{method}.json");
+                                is_deeply($tweet->{param}, $item->{option});
 
-                        if ($tweet->{hello}) {
-                            note(Dumper $tweet);
-                            is($tweet->{user}, 'test');
-                            is($tweet->{path}, "/1/statuses/$item->{method}.json");
-                            is_deeply($tweet->{param}, $item->{option});
-
-                            if (%{$item->{option}}) {
-                                is($tweet->{request_method}, 'POST');
+                                if (%{$item->{option}}) {
+                                    is($tweet->{request_method}, 'POST');
+                                } else {
+                                    is($tweet->{request_method}, 'GET');
+                                }
                             } else {
-                                is($tweet->{request_method}, 'GET');
+                                $done->send, return if $tweet->{count} > $count_max;
                             }
-                        } else {
-                            $done->send, return if $tweet->{count} > $count_max;
-                        }
 
-                        $received++;
-                    },
-                    on_delete => sub {
-                        my ($tweet_id, $user_id) = @_;
-                        $deleted++;
-                        $received++;
-                    },
-                    on_friends => sub {
-                        my $friends = shift;
-                        is_deeply($friends, [qw/1 2 3/]);
-                    },
-                    on_event => sub {
-                        $event++;
-                        $done->send;
-                    },
-                    on_error => sub {
-                        my $msg = $_[2] || $_[0];
-                        fail("on_error: $msg");
-                        $done->send;
-                    },
-                    %{$item->{option}},
-                );
-                $streamer->{_guard_for_testing} = guard { $destroyed = 1 };
+                            $received++;
+                        },
+                        on_delete => sub {
+                            my ($tweet_id, $user_id) = @_;
+                            $deleted++;
+                            $received++;
+                        },
+                        on_friends => sub {
+                            my $friends = shift;
+                            is_deeply($friends, [qw/1 2 3/]);
+                        },
+                        on_event => sub {
+                            $event++;
+                            $done->send;
+                        },
+                        on_error => sub {
+                            my $msg = $_[2] || $_[0];
+                            fail("on_error: $msg");
+                            $done->send;
+                        },
+                        %{$item->{option}},
+                    );
+                    $streamer->{_guard_for_testing} = guard { $destroyed = 1 };
 
-                $done->recv;
+                    $done->recv;
+                }
+
+                if ($item->{method} eq 'sample') {
+                    is $deleted, 1, 'deleted one tweet';
+                } else {
+                    is $deleted, 0, 'deleted no tweet';
+                }
+
+                if ($item->{method} eq 'userstream') {
+                    is $event, 1, 'got one event';
+                } else {
+                    is $event, 0, 'got no event';
+                    is($received, $count_max + 1, "received");
+                }
+
+                is $destroyed, 1, 'destroyed';
             }
+        },
+        server => sub {
+            my $port = shift;
 
-            if ($item->{method} ne 'userstream') {
-                is($received, $count_max + 1, "received");
-                is($destroyed, 1, "destroyed");
-            }
-        }
-    },
-    server => sub {
-        my $port = shift;
-
-        run_streaming_server($port);
-    },
-);
-
-is $deleted, 1, 'deleted one tweet';
-is $event, 1, 'got one event';
+            run_streaming_server($port, $enable_chunked);
+        },
+    );
+}
 
 done_testing();
 
 sub run_streaming_server {
-    my $port = shift;
+    my ($port, $enable_chunked) = @_;
 
     my $streaming = sub {
         my $env = shift;
@@ -200,6 +208,8 @@ sub run_streaming_server {
 
             return $user eq 'test' && $pass eq 's3cr3t';
         };
+        enable 'Chunked' if $enable_chunked;
+
         mount '/1/' => $streaming;
         mount '/2/' => $user_stream;
     };
