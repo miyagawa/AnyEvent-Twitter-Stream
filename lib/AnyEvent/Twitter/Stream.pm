@@ -194,7 +194,7 @@ sub new {
                     $on_eof->(@_);
                 });
 
-                if ($headers->{'transfer-encoding'} =~ /\bchunked\b/i) {
+                if (($headers->{'transfer-encoding'} || '') =~ /\bchunked\b/i) {
                     $handle->on_read(sub {
                         my ($handle) = @_;
                         $handle->push_read(line => $chunk_reader);
