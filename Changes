@@ -1,5 +1,9 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.20_1 Wed Apr 13 17:14:25 PDT 2011
+        - Workaround with AE::HTTP 2.0 that forces HTTP/1.1 which makes the Twitter response
+          transfered in chunked encoding (hidekiy)
+
 0.20  Fri Oct  1 01:10:51 PDT 2010
         - UserStreams is now live. Updated the host name and protocol to use HTTPS (norm)
 
