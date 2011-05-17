@@ -2,7 +2,7 @@ package AnyEvent::Twitter::Stream;
 
 use strict;
 use 5.008_001;
-our $VERSION = '0.20_1';
+our $VERSION = '0.21';
 
 use AnyEvent;
 use AnyEvent::HTTP;

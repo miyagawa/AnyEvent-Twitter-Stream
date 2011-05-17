@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.21  Tue May 17 09:54:03 PDT 2011
+        - Same as 0.20_1
+
 0.20_1 Wed Apr 13 17:14:25 PDT 2011
         - Workaround with AE::HTTP 2.0 that forces HTTP/1.1 which makes the Twitter response
           transfered in chunked encoding (hidekiy)
