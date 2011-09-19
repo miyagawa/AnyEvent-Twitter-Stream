@@ -45,6 +45,7 @@ sub new {
     my $on_delete       = delete $args{on_delete};
     my $on_friends      = delete $args{on_friends};
     my $on_event        = delete $args{on_event};
+    my $on_json			= delete $args{on_json};
     my $timeout         = delete $args{timeout};
 
     my $decode_json;
@@ -122,7 +123,9 @@ sub new {
             $set_timeout->();
             if ($json !~ /^\s*$/) {
                 my $tweet = $decode_json ? JSON::decode_json($json) : $json;
-                if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
+                if ($on_json) {
+                	$on_json->($tweet);
+                }elsif ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
                     $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
                 }elsif($on_friends && $tweet->{friends}) {
                     $on_friends->($tweet->{friends});
