@@ -357,6 +357,8 @@ B<Only with the usertream method>. Callback to execute when the stream send a li
 
 B<Only with the userstream method>. Callback to execute when the stream send an event notification (follow, ...).
 
+=back
+
 =head1 NOTES
 
 To use the B<userstream> method, Twitter recommend using the HTTPS protocol. For this, you need to set the B<ANYEVENT_TWITTER_STREAM_SSL> environment variable, and install the L<Net::SSLeay> module.
