@@ -14,7 +14,7 @@ use Carp;
 
 our $STREAMING_SERVER  = 'stream.twitter.com';
 our $USERSTREAM_SERVER = 'userstream.twitter.com';
-our $PROTOCOL          = $ENV{'ANYEVENT_TWITTER_STREAM_SSL'} ? 'https' : 'http';
+our $PROTOCOL          = 'https';
 our $US_PROTOCOL       = 'https'; # for testing
 
 my %methods = (

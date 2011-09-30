@@ -41,6 +41,7 @@ foreach my $enable_chunked (0, 1) {
             local $AnyEvent::Twitter::Stream::STREAMING_SERVER  = "127.0.0.1:$port";
             local $AnyEvent::Twitter::Stream::USERSTREAM_SERVER = "127.0.0.1:$port";
             local $AnyEvent::Twitter::Stream::US_PROTOCOL       = "http";
+            local $AnyEvent::Twitter::Stream::PROTOCOL          = 'http'; # real world API uses https
 
             foreach my $item (@pattern) {
                 my $destroyed;
