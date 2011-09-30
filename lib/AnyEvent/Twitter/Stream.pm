@@ -14,7 +14,7 @@ use Carp;
 
 our $STREAMING_SERVER  = 'stream.twitter.com';
 our $USERSTREAM_SERVER = 'userstream.twitter.com';
-our $PROTOCOL          = $ENV{'ANYEVENT_TWITTER_STREAM_SSL'} ? 'https' : 'http';
+our $PROTOCOL          = 'https';
 our $US_PROTOCOL       = 'https'; # for testing
 
 my %methods = (
@@ -356,6 +356,8 @@ B<Only with the usertream method>. Callback to execute when the stream send a li
 =item B<on_event>
 
 B<Only with the userstream method>. Callback to execute when the stream send an event notification (follow, ...).
+
+=back
 
 =head1 NOTES
 
