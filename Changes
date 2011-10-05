@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.22  Tue Oct  4 23:52:17 PDT 2011
+        - Streaming is now SSL only
+
 0.21  Tue May 17 09:54:03 PDT 2011
         - Same as 0.20_1
 
