@@ -21,6 +21,7 @@ test_tcp(
         my $port = shift;
 
         $AnyEvent::Twitter::Stream::STREAMING_SERVER = "localhost:$port";
+        $AnyEvent::Twitter::Stream::PROTOCOL = 'http'; # real world API uses https
 
         foreach my $w (keys %pattern) {
             my $destroyed;
