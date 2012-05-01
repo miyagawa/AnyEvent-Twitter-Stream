@@ -2,7 +2,7 @@ package AnyEvent::Twitter::Stream;
 
 use strict;
 use 5.008_001;
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 use AnyEvent;
 use AnyEvent::HTTP;
@@ -44,6 +44,7 @@ sub new {
     my $on_keepalive    = delete $args{on_keepalive} || sub { };
     my $on_delete       = delete $args{on_delete};
     my $on_friends      = delete $args{on_friends};
+    my $on_direct_message = delete $args{on_direct_message};
     my $on_event        = delete $args{on_event};
     my $timeout         = delete $args{timeout};
 
@@ -126,6 +127,8 @@ sub new {
                     $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
                 }elsif($on_friends && $tweet->{friends}) {
                     $on_friends->($tweet->{friends});
+                }elsif($on_direct_message && $tweet->{direct_message}) {
+                    $on_direct_message->($tweet->{direct_message});
                 }elsif($on_event && $tweet->{event}) {
                     $on_event->($tweet);
                 }else{
@@ -352,6 +355,10 @@ Callback to execute when the stream send a delete notification.
 =item B<on_friends>
 
 B<Only with the usertream method>. Callback to execute when the stream send a list of friends.
+
+=item B<on_direct_message>
+
+B<Only with the usertream method>. Callback to execute when a direct message is received in the stream.
 
 =item B<on_event>
 
