@@ -1,5 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
+0.23
+        - Added on_direct_message support (semifor)
+
 0.22  Tue Oct  4 23:52:17 PDT 2011
         - Streaming is now SSL only
 
