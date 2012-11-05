@@ -17,6 +17,7 @@ my $streamer = AnyEvent::Twitter::Stream->new(
     password => $password,
     method   => $method || "sample",
     %args,
+    use_compression => 1,
     on_tweet => sub {
         my $tweet = shift;
         print "$tweet->{user}{screen_name}: $tweet->{text}\n";

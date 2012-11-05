@@ -11,6 +11,7 @@ use MIME::Base64;
 use URI;
 use URI::Escape;
 use Carp;
+use Compress::Raw::Zlib;
 
 our $STREAMING_SERVER  = 'stream.twitter.com';
 our $USERSTREAM_SERVER = 'userstream.twitter.com';
@@ -52,6 +53,16 @@ sub new {
     unless (delete $args{no_decode_json}) {
         require JSON;
         $decode_json = 1;
+    }
+
+    my ($zlib, my $_zstatus);
+    if (delete $args{use_compression}){
+        ($zlib, $_zstatus)  = Compress::Raw::Zlib::Inflate->new(
+            -LimitOutput => 1,
+            -AppendOutput => 1,
+            -WindowBits => WANT_GZIP_OR_ZLIB,
+        );
+        die "Can't make inflator: $_zstatus" unless $zlib;
     }
 
     unless ($methods{$method}) {
@@ -145,6 +156,7 @@ sub new {
         $self->{connection_guard} = http_request($request_method, $uri,
             headers => {
                 Accept => '*/*',
+                ( defined $zlib ? ('Accept-Encoding' => 'deflate') : ()),
                 Authorization => $auth,
                 ($request_method eq 'POST'
                     ? ('Content-Type' => 'application/x-www-form-urlencoded')
@@ -165,7 +177,7 @@ sub new {
                 my ($handle, $headers) = @_;
 
                 return unless $handle;
-
+                my $input;
                 my $chunk_reader = sub {
                     my ($handle, $line) = @_;
 
@@ -174,13 +186,22 @@ sub new {
 
                     $handle->push_read(chunk => $len, sub {
                         my ($handle, $chunk) = @_;
+                        $handle->push_read(line => sub { length $_[1] and die 'bad chunk (missing last empty line)'; });
 
-                        $handle->push_read(line => sub {
-                            length $_[1] and die 'bad chunk (missing last empty line)';
-                        });
-
-                        $on_json_message->($chunk);
-                    });
+                        unless ($headers->{'content-encoding'}) { 
+                                $on_json_message->($chunk); 
+                        } elsif ($headers->{'content-encoding'} eq 'deflate') { 
+                               $input .= $chunk;
+                               my ($message);
+                               do { 
+                                   $_zstatus = $zlib->inflate(\$input, \$message);
+                                   return unless $_zstatus == Z_OK || $_zstatus == Z_BUF_ERROR;
+                               } while ( $_zstatus == Z_OK && length $input );
+                               $on_json_message->($message);
+                        } else {
+                                die "Don't know how to decode $headers->{'content-encoding'}"
+                        }
+                     });
                 };
                 my $line_reader = sub {
                     my ($handle, $line) = @_;
