@@ -156,7 +156,7 @@ sub new {
         $self->{connection_guard} = http_request($request_method, $uri,
             headers => {
                 Accept => '*/*',
-                ( defined $zlib ? ('Accept-Encoding' => 'deflate') : ()),
+                ( defined $zlib ? ('Accept-Encoding' => 'deflate, gzip') : ()),
                 Authorization => $auth,
                 ($request_method eq 'POST'
                     ? ('Content-Type' => 'application/x-www-form-urlencoded')
@@ -190,7 +190,7 @@ sub new {
 
                         unless ($headers->{'content-encoding'}) { 
                                 $on_json_message->($chunk); 
-                        } elsif ($headers->{'content-encoding'} eq 'deflate') { 
+                        } elsif ($headers->{'content-encoding'} =~ 'deflate|gzip') { 
                                $input .= $chunk;
                                my ($message);
                                do { 
