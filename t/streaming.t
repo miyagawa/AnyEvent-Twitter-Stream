@@ -13,22 +13,30 @@ use Test::Requires { 'Plack::Request' => '0.99' };
 my @pattern = (
     {
         method => 'sample',
+        mount  => 'stream',
+        path   => '/1.1/statuses/sample.json',
         option => {},
     },
     {
         method => 'firehose',
+        mount  => 'stream',
+        path   => '/1.1/statuses/firehose.json',
         option => {},
     },
     {
         method => 'filter',
+        mount  => 'stream',
+        path   => '/1.1/statuses/filter.json',
         option => {track => 'hogehoge'},
     },
     {
         method => 'filter',
+        path   => '/1.1/statuses/filter.json',
         option => {follow => '123123'},
     },
     {
         method => 'userstream',
+        path   => '/1.1/user.json',
         option => {},
     },
 );
@@ -64,7 +72,7 @@ foreach my $enable_chunked (0, 1) {
                             if ($tweet->{hello}) {
                                 note(Dumper $tweet);
                                 is($tweet->{user}, 'test');
-                                is($tweet->{path}, "/1/statuses/$item->{method}.json");
+                                is($tweet->{path}, $item->{path});
                                 is_deeply($tweet->{param}, $item->{option});
 
                                 if (%{$item->{option}}) {
@@ -109,7 +117,7 @@ foreach my $enable_chunked (0, 1) {
                     is $deleted, 0, 'deleted no tweet';
                 }
 
-                if ($item->{method} eq 'userstream') {
+                if ($item->{method} =~ /userstream|sitestream/) {
                     is $event, 1, 'got one event';
                 } else {
                     is $event, 0, 'got no event';
@@ -211,8 +219,8 @@ sub run_streaming_server {
         };
         enable 'Chunked' if $enable_chunked;
 
-        mount '/1/' => $streaming;
-        mount '/2/' => $user_stream;
+        mount '/1.1/statuses/' => $streaming;
+        mount '/'              => $user_stream;
     };
 
     my $server = Plack::Handler::Twiggy->new(

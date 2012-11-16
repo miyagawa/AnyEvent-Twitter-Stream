@@ -15,16 +15,20 @@ use Compress::Raw::Zlib;
 
 our $STREAMING_SERVER  = 'stream.twitter.com';
 our $USERSTREAM_SERVER = 'userstream.twitter.com';
+our $SITESTREAM_SERVER = 'sitestream.twitter.com';
 our $PROTOCOL          = 'https';
 our $US_PROTOCOL       = 'https'; # for testing
 
 my %methods = (
-    firehose   => [],
-    links      => [],
-    retweet    => [],
-    sample     => [],
-    userstream => [ qw(replies) ],
-    filter     => [ qw(track follow locations) ],
+    filter     => [ POST => sub { "$PROTOCOL://$STREAMING_SERVER/1.1/statuses/filter.json"   } ],
+    sample     => [ GET  => sub { "$PROTOCOL://$STREAMING_SERVER/1.1/statuses/sample.json"   } ],
+    firehose   => [ GET  => sub { "$PROTOCOL://$STREAMING_SERVER/1.1/statuses/firehose.json" } ],
+    userstream => [ GET  => sub { "$US_PROTOCOL://$USERSTREAM_SERVER/1.1/user.json"          } ],
+    sitestream => [ GET  => sub { "$PROTOCOL://$SITESTREAM_SERVER/1.1/site.json"             } ],
+
+    # DEPRECATED
+    links      => [ GET  => sub { "$PROTOCOL://$STREAMING_SERVER/1/statuses/links.json"   } ],
+    retweet    => [ GET  => sub { "$PROTOCOL://$STREAMING_SERVER/1/statuses/retweet.json" } ],
 );
 
 sub new {
@@ -65,33 +69,19 @@ sub new {
         die "Can't make inflator: $_zstatus" unless $zlib;
     }
 
-    unless ($methods{$method}) {
+    unless ($methods{$method} || exists $args{api_url} ) {
         $on_error->("Method $method not available.");
         return;
     }
 
-    my %post_args;
-    for my $param ( @{ $methods{$method} } ) {
-        next if $method eq 'userstream' && $param eq 'replies';
-        if ( exists $args{$param} ) {
-            $post_args{$param} = delete $args{$param};
-        }
-    }
+    my $uri = URI->new(delete $args{api_url} || $methods{$method}[1]());
 
-    my $uri;
-    if ($method eq 'userstream') {
-        $uri = URI->new("$US_PROTOCOL://$USERSTREAM_SERVER/2/user.json");
-    }else{
-        $uri = URI->new("$PROTOCOL://$STREAMING_SERVER/1/statuses/$method.json");
-    }
-
-    $uri->query_form(%args);
-
-    my $request_method = 'GET';
     my $request_body;
-    if ($method eq 'filter' || $method eq 'userstream') {
-        $request_method = 'POST';
-        $request_body = join '&', map "$_=" . URI::Escape::uri_escape($post_args{$_}), keys %post_args;
+    my $request_method = delete $args{request_method} || $methods{$method}[0] || 'GET';
+    if ( $request_method eq 'POST' ) {
+        $request_body = join '&', map "$_=" . URI::Escape::uri_escape($args{$_}), keys %args;
+    }else{
+        $uri->query_form(%args);
     }
 
     my $auth;
@@ -110,7 +100,7 @@ sub new {
             timestamp        => time,
             nonce            => MIME::Base64::encode( time . $$ . rand ),
             request_url      => $uri,
-            extra_params     => \%post_args,
+            $request_method eq 'POST' ? (extra_params => \%args) : (),
         );
         $request->sign;
         $auth = $request->to_authorization_header;
@@ -335,10 +325,6 @@ The name of the method you want to use on the stream. Currently, anyone of :
 
 =item B<firehose>
 
-=item B<links>
-
-=item B<retweet>
-
 =item B<sample>
 
 =item B<userstream>
@@ -350,6 +336,14 @@ To use this method, you need to use the OAuth mechanism.
 With this method you can specify what you want to filter amongst B<track>, B<follow> and B<locations>.
 
 =back
+
+=item B<api_url>
+
+Pass this to override the default URL for the API endpoint.
+
+=item B<request_method>
+
+Pass this to override the default HTTP request method.
 
 =item B<timeout>
 
@@ -384,6 +378,10 @@ B<Only with the usertream method>. Callback to execute when a direct message is 
 =item B<on_event>
 
 B<Only with the userstream method>. Callback to execute when the stream send an event notification (follow, ...).
+
+=item B<additional agruments>
+
+Any additional arguments are assumed to be parameters to the underlying API method and are passed to Twitter.
 
 =back
 
