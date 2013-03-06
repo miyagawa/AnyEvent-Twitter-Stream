@@ -64,7 +64,7 @@ foreach my $enable_chunked (0, 1) {
                             if ($tweet->{hello}) {
                                 note(Dumper $tweet);
                                 is($tweet->{user}, 'test');
-                                is($tweet->{path}, "/1/statuses/$item->{method}.json");
+                                is($tweet->{path}, "/1.1/statuses/$item->{method}.json");
                                 is_deeply($tweet->{param}, $item->{option});
 
                                 if (%{$item->{option}}) {
@@ -211,8 +211,10 @@ sub run_streaming_server {
         };
         enable 'Chunked' if $enable_chunked;
 
-        mount '/1/' => $streaming;
-        mount '/2/' => $user_stream;
+        mount '/1.1' => builder {
+            mount '/user.json' => $user_stream;
+            mount '/statuses'  => $streaming;
+        };
     };
 
     my $server = Plack::Handler::Twiggy->new(
