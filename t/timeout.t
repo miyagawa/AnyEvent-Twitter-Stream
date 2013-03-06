@@ -122,7 +122,7 @@ sub run_streaming_server {
 
             return $user eq 'test' && $pass eq 's3cr3t';
         };
-        mount '/1/' => $streaming;
+        mount '/1.1/' => $streaming;
     };
 
     my $server = Plack::Handler::Twiggy->new(

@@ -68,9 +68,9 @@ sub new {
 
     my $uri;
     if ($method eq 'userstream') {
-        $uri = URI->new("$US_PROTOCOL://$USERSTREAM_SERVER/2/user.json");
+        $uri = URI->new("$US_PROTOCOL://$USERSTREAM_SERVER/1.1/user.json");
     }else{
-        $uri = URI->new("$PROTOCOL://$STREAMING_SERVER/1/statuses/$method.json");
+        $uri = URI->new("$PROTOCOL://$STREAMING_SERVER/1.1/statuses/$method.json");
     }
 
     $uri->query_form(%args);
