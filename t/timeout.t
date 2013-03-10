@@ -4,7 +4,7 @@ use AnyEvent::Twitter::Stream;
 use AnyEvent::Util qw(guard);
 use Data::Dumper;
 use JSON;
-use Test::More skip_all => 'broken';
+use Test::More;
 use Test::TCP;
 use Test::Requires qw(Plack::Builder Plack::Handler::Twiggy Try::Tiny);
 use Test::Requires { 'Plack::Request' => '0.99' };
@@ -122,7 +122,7 @@ sub run_streaming_server {
 
             return $user eq 'test' && $pass eq 's3cr3t';
         };
-        mount '/1/' => $streaming;
+        mount '/1.1/' => $streaming;
     };
 
     my $server = Plack::Handler::Twiggy->new(
