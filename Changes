@@ -1,6 +1,8 @@
 Revision history for Perl extension AnyEvent::Twitter::Stream
 
 {{$NEXT}}
+
+0.24  2013-05-13 16:26:48 PDT
         - Make it non-trial
         - Convert to Milla
 

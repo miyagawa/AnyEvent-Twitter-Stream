@@ -64,7 +64,7 @@
          "web" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream"
       }
    },
-   "version" : "0.23",
+   "version" : "0.24",
    "x_contributors" : [
       "Chris Prather <chris@prather.org>",
       "Daisuke Murase <typester@cpan.org>",
