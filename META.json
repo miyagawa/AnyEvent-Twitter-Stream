@@ -1,0 +1,80 @@
+{
+   "abstract" : "Receive Twitter streaming API in an event loop",
+   "author" : [
+      "Tatsuhiko Miyagawa <miyagawa@bulknews.net>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Milla version v1.0.2, Dist::Zilla version 4.300034, CPAN::Meta::Converter version 2.130880",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "AnyEvent-Twitter-Stream",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "xt",
+         "inc",
+         "share",
+         "eg",
+         "examples"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.59",
+            "Test::More" : "0",
+            "Test::Requires" : "0",
+            "Test::TCP" : "0"
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "Module::Build::Tiny" : "0.019"
+         }
+      },
+      "develop" : {
+         "requires" : {
+            "Test::Pod" : "1.41"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "AnyEvent" : "0",
+            "AnyEvent::HTTP" : "2.0",
+            "JSON" : "2.0",
+            "URI" : "0",
+            "perl" : "5.008001"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream/issues"
+      },
+      "homepage" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream",
+      "repository" : {
+         "type" : "git",
+         "url" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream.git",
+         "web" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream"
+      }
+   },
+   "version" : "0.23",
+   "x_contributors" : [
+      "Chris Prather <chris@prather.org>",
+      "Daisuke Murase <typester@cpan.org>",
+      "Marc Mims <marc@questright.com>",
+      "Mark Norman Francis <norm@cackhanded.net>",
+      "Tatsuhiko Miyagawa <miyagawa@gmail.com>",
+      "franck cuny <franck@lumberjaph.net>",
+      "hidekiy <hideki.yamamura@gmail.com>",
+      "megamic <megamic@cpan.org>",
+      "punytan <punytan@gmail.com>"
+   ]
+}
+
