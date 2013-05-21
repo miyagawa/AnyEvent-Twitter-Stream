@@ -2,6 +2,9 @@ Revision history for Perl extension AnyEvent::Twitter::Stream
 
 {{$NEXT}}
 
+0.25  2013-05-20 18:02:46 PDT
+        - Encode URI parameters with UTF-8 (Yapo, Songmu)
+
 0.24  2013-05-13 16:26:48 PDT
         - Make it non-trial
         - Convert to Milla

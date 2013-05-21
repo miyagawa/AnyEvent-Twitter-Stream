@@ -34,7 +34,7 @@
       },
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.019"
+            "Module::Build::Tiny" : "0.020"
          }
       },
       "develop" : {
@@ -64,12 +64,13 @@
          "web" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream"
       }
    },
-   "version" : "0.24",
+   "version" : "0.25",
    "x_contributors" : [
       "Chris Prather <chris@prather.org>",
       "Daisuke Murase <typester@cpan.org>",
       "Marc Mims <marc@questright.com>",
       "Mark Norman Francis <norm@cackhanded.net>",
+      "Masayuki Matsuki <y.songmu@gmail.com>",
       "Tatsuhiko Miyagawa <miyagawa@gmail.com>",
       "franck cuny <franck@lumberjaph.net>",
       "hidekiy <hideki.yamamura@gmail.com>",
