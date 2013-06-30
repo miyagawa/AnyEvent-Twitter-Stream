@@ -43,6 +43,7 @@ sub new {
     my $token_secret    = delete $args{token_secret};
     my $method          = delete $args{method};
     my $on_connect      = delete $args{on_connect} || sub { };
+    my $on_prepare      = delete $args{on_prepare} || sub { };
     my $on_tweet        = delete $args{on_tweet};
     my $on_error        = delete $args{on_error} || sub { die @_ };
     my $on_eof          = delete $args{on_eof} || sub { };
@@ -154,6 +155,7 @@ sub new {
                 ),
             },
             body => $request_body,
+            on_prepare => $on_prepare,
             on_header => sub {
                 my($headers) = @_;
                 if ($headers->{Status} ne '200') {
