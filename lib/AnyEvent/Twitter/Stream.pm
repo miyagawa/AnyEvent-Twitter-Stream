@@ -256,7 +256,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
       username => $user,
       password => $password,
       method   => "filter",  # "firehose" for everything, "sample" for sample timeline
-      follow   => join(",", @following_ids),
+      follow   => join(",", @following_ids), # numeric IDs
       on_tweet => sub {
           my $tweet = shift;
           warn "$tweet->{user}{screen_name}: $tweet->{text}\n";
@@ -334,6 +334,8 @@ To use this method, you need to use the OAuth mechanism.
 =item B<filter>
 
 With this method you can specify what you want to filter amongst B<track>, B<follow> and B<locations>.
+
+See L<https://dev.twitter.com/docs/api/1.1/post/statuses/filter> for the details of the parameters.
 
 =back
 
