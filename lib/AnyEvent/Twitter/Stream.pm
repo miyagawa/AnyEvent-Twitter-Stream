@@ -123,21 +123,23 @@ sub new {
             # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
             $set_timeout->();
             if ($json !~ /^\s*$/) {
-                my $tweet = $decode_json ? JSON::decode_json($json) : $json;
-                if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
-                    $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
-                }elsif($on_friends && $tweet->{friends}) {
-                    $on_friends->($tweet->{friends});
-                }elsif($on_direct_message && $tweet->{direct_message}) {
-                    $on_direct_message->($tweet->{direct_message});
-                }elsif($on_event && $tweet->{event}) {
-                    $on_event->($tweet);
-                }else{
-                    $on_tweet->($tweet);
+                my $tweet; $tweet = eval { $decode_json ? JSON::decode_json($json) : $json; };
+                if ($tweet) {
+                    if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
+                        $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
+                    }elsif($on_friends && $tweet->{friends}) {
+                        $on_friends->($tweet->{friends});
+                    }elsif($on_direct_message && $tweet->{direct_message}) {
+                        $on_direct_message->($tweet->{direct_message});
+                    }elsif($on_event && $tweet->{event}) {
+                        $on_event->($tweet);
+                    }else{
+                        $on_tweet->($tweet);
+                    }
                 }
-            }
-            else {
-                $on_keepalive->();
+                else {
+                    $on_keepalive->();
+                }
             }
         };
 
