@@ -123,7 +123,28 @@ sub new {
             # Twitter stream returns "\x0a\x0d\x0a" if there's no matched tweets in ~30s.
             $set_timeout->();
             if ($json !~ /^\s*$/) {
-                my $tweet = $decode_json ? JSON::decode_json($json) : $json;
+		# Protect JSON decode
+		my $tweet;
+
+		eval {
+			$tweet = $decode_json ? JSON::decode_json($json) : $json;
+		};
+
+		if ($@) {
+			if ($on_event) {
+				my $hr = {
+					event => 'json_error',
+					error => $@,
+					json => $json,
+					length => length($json),
+				};
+
+				$on_event->($hr);
+			}
+
+			return;
+		}
+
                 if ($on_delete && $tweet->{delete} && $tweet->{delete}->{status}) {
                     $on_delete->($tweet->{delete}->{status}->{id}, $tweet->{delete}->{status}->{user_id});
                 }elsif($on_friends && $tweet->{friends}) {
