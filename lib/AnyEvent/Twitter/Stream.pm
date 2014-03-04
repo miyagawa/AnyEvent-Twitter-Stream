@@ -168,31 +168,38 @@ sub new {
 
                 return unless $handle;
                 my $input;
-                my $chunk_reader = sub {
+                my $chunk_reader;
+                $chunk_reader = sub {
                     my ($handle, $line) = @_;
 
                     $line =~ /^([0-9a-fA-F]+)/ or die 'bad chunk (incorrect length)';
                     my $len = hex $1;
-
-                    $handle->push_read(chunk => $len, sub {
-                        my ($handle, $chunk) = @_;
-                        $handle->push_read(line => sub { length $_[1] and die 'bad chunk (missing last empty line)'; });
-
+                    my $chunk_part_reader;
+                    $chunk_part_reader = sub {
+                        my ($handle, $chunk_raw) = @_;
+                        my $chunk = $chunk_raw;
+                        $chunk =~ s/\r\n$//;
+                        $input .= $chunk;
                         unless ($headers->{'content-encoding'}) { 
-                                $on_json_message->($chunk); 
+                            while ($input =~ s/^(.*?)\r\n//) {
+                                my ($json_raw) = $1;
+                                $on_json_message->($json_raw);
+                            }
                         } elsif ($headers->{'content-encoding'} =~ 'deflate|gzip') { 
-                               $input .= $chunk;
                                my ($message);
                                do { 
-                                   $_zstatus = $zlib->inflate(\$input, \$message);
-                                   return unless $_zstatus == Z_OK || $_zstatus == Z_BUF_ERROR;
+                               $_zstatus = $zlib->inflate(\$input, \$message);
+                               return unless $_zstatus == Z_OK || $_zstatus == Z_BUF_ERROR;
                                } while ( $_zstatus == Z_OK && length $input );
                                $on_json_message->($message);
                         } else {
-                                die "Don't know how to decode $headers->{'content-encoding'}"
+                            die "Don't know how to decode $headers->{'content-encoding'}"
                         }
-                     });
+                        $handle->push_read(line => $chunk_reader);
+                    }; # chunk_part_reader
+                    $handle->push_read(chunk => $len + 2, $chunk_part_reader);
                 };
+
                 my $line_reader = sub {
                     my ($handle, $line) = @_;
 
