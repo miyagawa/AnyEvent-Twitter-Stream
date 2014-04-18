@@ -257,6 +257,8 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
 =head1 SYNOPSIS
 
   use AnyEvent::Twitter::Stream;
+  
+  my $done = AE::cv;
 
   # receive updates from @following_ids
   my $listener = AnyEvent::Twitter::Stream->new(
@@ -297,6 +299,8 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
       track           => "...",
       on_tweet        => sub { ... },
   );
+  
+  $done->recv;
 
 =head1 DESCRIPTION
 
@@ -364,7 +368,8 @@ Callback to execute when a stream is connected.
 
 =item B<on_tweet>
 
-Callback to execute when a new tweet is received.
+Callback to execute when a new tweet is received. The argument is the tweet, a hashref documented at
+L<https://dev.twitter.com/docs/api/1/get/statuses/show/%3Aid>.
 
 =item B<on_error>
 
