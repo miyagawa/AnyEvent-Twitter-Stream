@@ -11,7 +11,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
         username => $user,
         password => $password,
         method   => "filter",  # "firehose" for everything, "sample" for sample timeline
-        follow   => join(",", @following_ids),
+        follow   => join(",", @following_ids), # numeric IDs
         on_tweet => sub {
             my $tweet = shift;
             warn "$tweet->{user}{screen_name}: $tweet->{text}\n";
@@ -49,10 +49,10 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
 # DESCRIPTION
 
 AnyEvent::Twitter::Stream is an AnyEvent user to receive Twitter streaming
-API, available at [http://dev.twitter.com/pages/streaming\_api](http://dev.twitter.com/pages/streaming\_api) and
-[http://dev.twitter.com/pages/user\_streams](http://dev.twitter.com/pages/user\_streams).
+API, available at [http://dev.twitter.com/pages/streaming\_api](http://dev.twitter.com/pages/streaming_api) and
+[http://dev.twitter.com/pages/user\_streams](http://dev.twitter.com/pages/user_streams).
 
-See ["track.pl" in eg](http://search.cpan.org/perldoc?eg#track.pl) for more client code example.
+See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client code example.
 
 # METHODS
 
@@ -83,6 +83,8 @@ See ["track.pl" in eg](http://search.cpan.org/perldoc?eg#track.pl) for more clie
     - __filter__
 
         With this method you can specify what you want to filter amongst __track__, __follow__ and __locations__.
+
+        See [https://dev.twitter.com/docs/api/1.1/post/statuses/filter](https://dev.twitter.com/docs/api/1.1/post/statuses/filter) for the details of the parameters.
 
 - __api\_url__
 
@@ -129,7 +131,7 @@ See ["track.pl" in eg](http://search.cpan.org/perldoc?eg#track.pl) for more clie
 
 # NOTES
 
-To use the __userstream__ method, Twitter recommend using the HTTPS protocol. For this, you need to set the __ANYEVENT\_TWITTER\_STREAM\_SSL__ environment variable, and install the [Net::SSLeay](http://search.cpan.org/perldoc?Net::SSLeay) module.
+To use the __userstream__ method, Twitter recommend using the HTTPS protocol. For this, you need to set the __ANYEVENT\_TWITTER\_STREAM\_SSL__ environment variable, and install the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) module.
 
 # AUTHOR
 
@@ -142,4 +144,4 @@ it under the same terms as Perl itself.
 
 # SEE ALSO
 
-[AnyEvent::Twitter](http://search.cpan.org/perldoc?AnyEvent::Twitter), [Net::Twitter::Stream](http://search.cpan.org/perldoc?Net::Twitter::Stream)
+[AnyEvent::Twitter](https://metacpan.org/pod/AnyEvent::Twitter), [Net::Twitter::Stream](https://metacpan.org/pod/Net::Twitter::Stream)
