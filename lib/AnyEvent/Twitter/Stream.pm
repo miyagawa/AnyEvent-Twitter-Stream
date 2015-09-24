@@ -59,7 +59,7 @@ sub new {
         $decode_json = 1;
     }
 
-    my ($zlib, my $_zstatus);
+    my ($zlib, $_zstatus);
     if (delete $args{use_compression}){
         ($zlib, $_zstatus)  = Compress::Raw::Zlib::Inflate->new(
             -LimitOutput => 1,
