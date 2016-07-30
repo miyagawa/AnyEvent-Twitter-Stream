@@ -2,6 +2,9 @@ Revision history for Perl extension AnyEvent::Twitter::Stream
 
 {{$NEXT}}
 
+0.28  2016-07-29 18:02:28 PDT
+        - Make it work on perl 5.24
+
 0.27  2014-04-18 14:08:51 JST
         - Fixed Chunked handling for long JSON strings (dexterbt1)
 

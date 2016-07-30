@@ -4,33 +4,34 @@
       "Tatsuhiko Miyagawa <miyagawa@bulknews.net>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Milla version v1.0.4, Dist::Zilla version 5.015, CPAN::Meta::Converter version 2.140640",
+   "generated_by" : "Dist::Milla version v1.0.16, Dist::Zilla version 6.006, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "AnyEvent-Twitter-Stream",
    "no_index" : {
       "directory" : [
-         "t",
-         "xt",
+         "eg",
+         "examples",
          "inc",
          "share",
-         "eg",
-         "examples"
+         "t",
+         "xt"
       ]
    },
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "Module::Build::Tiny" : "0.035"
+            "Module::Build::Tiny" : "0.034"
          }
       },
       "develop" : {
          "requires" : {
+            "Dist::Milla" : "v1.0.16",
             "Test::Pod" : "1.41"
          }
       },
@@ -63,19 +64,20 @@
          "web" : "https://github.com/miyagawa/AnyEvent-Twitter-Stream"
       }
    },
-   "version" : "0.27",
+   "version" : "0.28",
    "x_contributors" : [
       "Chris Prather <chris@prather.org>",
       "Daisuke Murase <typester@cpan.org>",
+      "Dan Dascalescu <ddascalescu+github@gmail.com>",
       "Dexter Tad-y <dtady@cpan.org>",
+      "franck cuny <franck@lumberjaph.net>",
+      "hidekiy <hideki.yamamura@gmail.com>",
       "Marc Mims <marc@questright.com>",
       "Mark Norman Francis <norm@cackhanded.net>",
       "Masayuki Matsuki <y.songmu@gmail.com>",
-      "Tatsuhiko Miyagawa <miyagawa@gmail.com>",
-      "franck cuny <franck@lumberjaph.net>",
-      "hidekiy <hideki.yamamura@gmail.com>",
       "megamic <megamic@cpan.org>",
       "punytan <punytan@gmail.com>"
-   ]
+   ],
+   "x_serialization_backend" : "Cpanel::JSON::XS version 3.0217"
 }
 

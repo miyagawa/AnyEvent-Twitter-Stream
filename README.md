@@ -5,6 +5,8 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
 # SYNOPSIS
 
     use AnyEvent::Twitter::Stream;
+    
+    my $done = AE::cv;
 
     # receive updates from @following_ids
     my $listener = AnyEvent::Twitter::Stream->new(
@@ -45,6 +47,8 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
         track           => "...",
         on_tweet        => sub { ... },
     );
+    
+    $done->recv;
 
 # DESCRIPTION
 
@@ -58,80 +62,77 @@ See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client cod
 
 ## my $streamer = AnyEvent::Twitter::Stream->new(%args);
 
-- __username__ __password__
+- **username** **password**
 
     These arguments are used for basic authentication.
 
-- __consumer\_key__ __consumer\_secret__ __token__ __token\_secret__
-
-    If you want to use the OAuth authentication mechanism, you need to set use arguments
-
-- __consumer\_key__ __consumer\_secret__ __token__ __token\_secret__
+- **consumer\_key** **consumer\_secret** **token** **token\_secret**
 
     If you want to use the OAuth authentication mechanism, you need to set these arguments
 
-- __method__
+- **method**
 
-    The name of the method you want to use on the stream. Currently, anyone of :
+    The name of the method you want to use on the stream. Currently, any one of :
 
-    - __firehose__
-    - __sample__
-    - __userstream__
+    - **firehose**
+    - **sample**
+    - **userstream**
 
         To use this method, you need to use the OAuth mechanism.
 
-    - __filter__
+    - **filter**
 
-        With this method you can specify what you want to filter amongst __track__, __follow__ and __locations__.
+        With this method you can specify what you want to filter amongst **track**, **follow** and **locations**.
 
         See [https://dev.twitter.com/docs/api/1.1/post/statuses/filter](https://dev.twitter.com/docs/api/1.1/post/statuses/filter) for the details of the parameters.
 
-- __api\_url__
+- **api\_url**
 
     Pass this to override the default URL for the API endpoint.
 
-- __request\_method__
+- **request\_method**
 
     Pass this to override the default HTTP request method.
 
-- __timeout__
+- **timeout**
 
     Set the timeout value.
 
-- __on\_connect__
+- **on\_connect**
 
     Callback to execute when a stream is connected.
 
-- __on\_tweet__
+- **on\_tweet**
 
-    Callback to execute when a new tweet is received.
+    Callback to execute when a new tweet is received. The argument is the tweet, a hashref documented at
+    [https://dev.twitter.com/docs/api/1/get/statuses/show/%3Aid](https://dev.twitter.com/docs/api/1/get/statuses/show/%3Aid).
 
-- __on\_error__
-- __on\_eof__
-- __on\_keepalive__
-- __on\_delete__
+- **on\_error**
+- **on\_eof**
+- **on\_keepalive**
+- **on\_delete**
 
     Callback to execute when the stream send a delete notification.
 
-- __on\_friends__
+- **on\_friends**
 
-    __Only with the usertream method__. Callback to execute when the stream send a list of friends.
+    **Only with the usertream method**. Callback to execute when the stream send a list of friends.
 
-- __on\_direct\_message__
+- **on\_direct\_message**
 
-    __Only with the usertream method__. Callback to execute when a direct message is received in the stream.
+    **Only with the usertream method**. Callback to execute when a direct message is received in the stream.
 
-- __on\_event__
+- **on\_event**
 
-    __Only with the userstream method__. Callback to execute when the stream send an event notification (follow, ...).
+    **Only with the userstream method**. Callback to execute when the stream send an event notification (follow, ...).
 
-- __additional agruments__
+- **additional agruments**
 
     Any additional arguments are assumed to be parameters to the underlying API method and are passed to Twitter.
 
 # NOTES
 
-To use the __userstream__ method, Twitter recommend using the HTTPS protocol. For this, you need to set the __ANYEVENT\_TWITTER\_STREAM\_SSL__ environment variable, and install the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) module.
+To use the **userstream** method, Twitter recommend using the HTTPS protocol. For this, you need to set the **ANYEVENT\_TWITTER\_STREAM\_SSL** environment variable, and install the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) module.
 
 # AUTHOR
 
