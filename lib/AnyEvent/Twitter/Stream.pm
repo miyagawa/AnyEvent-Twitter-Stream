@@ -47,6 +47,7 @@ sub new {
     my $on_error        = delete $args{on_error} || sub { die @_ };
     my $on_eof          = delete $args{on_eof} || sub { };
     my $on_keepalive    = delete $args{on_keepalive} || sub { };
+    my $on_limit        = delete $args{on_limit};
     my $on_delete       = delete $args{on_delete};
     my $on_friends      = delete $args{on_friends};
     my $on_direct_message = delete $args{on_direct_message};
@@ -132,6 +133,8 @@ sub new {
                     $on_direct_message->($tweet->{direct_message});
                 }elsif($on_event && $tweet->{event}) {
                     $on_event->($tweet);
+                }elsif($on_limit && $tweet->{limit}) {
+                    $on_limit->($tweet->{limit}->{track}, $tweet->{limit}->{timestamp_ms});
                 }else{
                     $on_tweet->($tweet);
                 }
@@ -376,6 +379,9 @@ L<https://dev.twitter.com/docs/api/1/get/statuses/show/%3Aid>.
 =item B<on_delete>
 
 Callback to execute when the stream send a delete notification.
+
+=item B<on_limit>
+Callback to execute when the stream sends a notification that it matches more tweets than allowed to deliver
 
 =item B<on_friends>
 
