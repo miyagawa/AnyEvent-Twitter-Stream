@@ -1,6 +1,10 @@
-# NAME
+# DESCRIPTION
 
-AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
+AnyEvent::Twitter::Stream allows an AnyEvent user to receive Twitter streaming through the API, available at [http://dev.twitter.com/pages/streaming\_api](http://dev.twitter.com/pages/streaming_api) and
+[http://dev.twitter.com/pages/user\_streams](http://dev.twitter.com/pages/user_streams).
+
+See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client code examples.
+
 
 # SYNOPSIS
 
@@ -49,15 +53,7 @@ AnyEvent::Twitter::Stream - Receive Twitter streaming API in an event loop
     );
     
     $done->recv;
-
-# DESCRIPTION
-
-AnyEvent::Twitter::Stream is an AnyEvent user to receive Twitter streaming
-API, available at [http://dev.twitter.com/pages/streaming\_api](http://dev.twitter.com/pages/streaming_api) and
-[http://dev.twitter.com/pages/user\_streams](http://dev.twitter.com/pages/user_streams).
-
-See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client code example.
-
+    
 # METHODS
 
 ## my $streamer = AnyEvent::Twitter::Stream->new(%args);
@@ -112,15 +108,15 @@ See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client cod
 - **on\_keepalive**
 - **on\_delete**
 
-    Callback to execute when the stream send a delete notification.
+    Callback to execute when the stream sends a delete notification.
 
 - **on\_friends**
 
-    **Only with the usertream method**. Callback to execute when the stream send a list of friends.
+    **Only with the userstream method**. Callback to execute when the stream send a list of friends.
 
 - **on\_direct\_message**
 
-    **Only with the usertream method**. Callback to execute when a direct message is received in the stream.
+    **Only with the userstream method**. Callback to execute when a direct message is received in the stream.
 
 - **on\_event**
 
@@ -132,7 +128,7 @@ See ["track.pl" in eg](https://metacpan.org/pod/eg#track.pl) for more client cod
 
 # NOTES
 
-To use the **userstream** method, Twitter recommend using the HTTPS protocol. For this, you need to set the **ANYEVENT\_TWITTER\_STREAM\_SSL** environment variable, and install the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) module.
+To use the **userstream** method, Twitter recommends using the HTTPS protocol. For this, you need to set the **ANYEVENT\_TWITTER\_STREAM\_SSL** environment variable, and install the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) module.
 
 # AUTHOR
 
